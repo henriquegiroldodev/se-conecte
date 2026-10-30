@@ -1,0 +1,78 @@
+/* Extensões do Design System: preferências, ajuda e educação em segurança. */
+html.font-large{--base:18px}html.font-extra{--base:20px}
+html{scroll-padding-top:140px;scroll-padding-bottom:140px}
+button,a,input,select,textarea,[tabindex]{scroll-margin-top:140px;scroll-margin-bottom:140px}
+.auth-mode{margin-top:16px}
+dialog{max-height:calc(100dvh - 28px);overflow:auto;color:var(--ink);background:var(--white)}
+.modal-head{align-items:start;gap:16px}.modal-head h2{margin-bottom:12px}.modal-head .btn{flex-shrink:0}
+.setting{flex-wrap:wrap}.setting>span:first-child{flex:1;min-width:160px}
+.toggle-control{display:flex;align-items:center;gap:10px;font-size:.85rem}
+.toggle-control input{width:26px;height:26px;accent-color:var(--blue)}
+.save-status{font-size:.85rem;margin:16px 0 0}
+.preference-options{display:grid;gap:12px;margin-top:20px}
+.preference-choice{display:block;text-align:left;min-height:56px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--ink);line-height:1.5}
+.preference-choice b,.preference-choice span{display:block}.preference-choice span{color:var(--muted);margin-top:5px;font-size:.9rem}
+.preference-choice:hover{background:var(--blueS);border-color:var(--blue)}
+.help-trigger{position:fixed;right:18px;bottom:18px;z-index:65;box-shadow:0 4px 20px #10182815}
+.main-page{padding-bottom:110px}.toast{bottom:86px;max-width:calc(100vw - 36px)}
+.speech-panel{position:fixed;right:18px;bottom:80px;z-index:210;max-width:calc(100vw - 36px);padding:14px}
+.speech-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+dialog .speech-panel{position:static;margin-top:20px;max-width:100%;box-shadow:none}
+.topbar .mobile{width:auto;border-radius:10px;font-size:.9rem;white-space:nowrap}
+.top-actions{gap:8px}.topbar .btn{white-space:nowrap}
+.sidebar{overflow-y:auto}.sidebar nav a,.side-bottom button,.side-bottom a{min-height:44px}
+.segments button{min-width:44px;min-height:44px}
+body.large-targets button,body.large-targets .btn,body.large-targets .lesson,body.large-targets .category,body.large-targets nav a,body.large-targets .side-bottom a{min-height:56px}
+body.large-targets button,body.large-targets .btn{padding:14px 18px}
+body.large-targets .user{min-width:56px}body.large-targets .sidebar nav a{padding:16px 13px}
+body.large-targets .sidebar .brand{flex-shrink:0}body.large-targets .side-bottom{padding-top:20px}
+body.highlight-actions a{text-decoration:underline;text-underline-offset:4px}
+body.highlight-actions button,body.highlight-actions .btn{outline:2px solid currentColor;outline-offset:1px}
+:focus-visible{outline:3px solid var(--blue2);outline-offset:4px;box-shadow:0 0 0 6px var(--white)}
+.hero :focus-visible,.xp :focus-visible,.level :focus-visible{outline-color:var(--white);box-shadow:0 0 0 6px var(--navy)}
+.orangeBtn{color:var(--ink)}
+.safety-invite{display:grid;gap:24px}.safety-invite h2{margin:12px 0}.safety-tip{border-left:4px solid var(--orange);padding:16px;background:var(--orangeS);border-radius:0 12px 12px 0}.safety-tip p{margin:0;color:var(--text)}
+.safety-page .meta{margin-bottom:20px;line-height:1.8}.safety-page h1{font-size:clamp(1.8rem,4vw,2.6rem);overflow-wrap:anywhere}
+.safety-page .detail-side .btn{margin:16px 0 4px}.safety-page .lesson{grid-template-columns:36px minmax(0,1fr)}
+.training-notice{font-size:.9rem;padding:12px 14px;background:var(--blueS);border-radius:10px;color:var(--text);line-height:1.65}
+.safety-rule{margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.safety-rule h3{font-size:1rem;line-height:1.7;overflow-wrap:anywhere}.safety-rule ol{display:grid;gap:16px;margin:0;padding-left:22px}.safety-rule b,.safety-rule span{display:block}.safety-rule span{color:var(--text);line-height:1.65;margin-top:4px}
+.step-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}.step-heading p{margin:0;font-weight:700;color:var(--text)}
+.learning-step{margin:26px 0;line-height:1.8;min-width:0}.learning-step h2{line-height:1.4}.learning-step li{margin-bottom:12px}
+.simple-explanation{display:none;padding-left:26px}.simple-explanation li{padding-left:6px}
+body.easy-mode .normal-explanation{display:none}body.easy-mode .simple-explanation{display:grid;gap:12px}
+body.easy-mode .learning-step{line-height:1.9;font-size:1.1rem}body.easy-mode .lesson-content{padding:28px}
+body.easy-mode .learning-step .simple-explanation li{display:none}body.easy-mode .learning-step .simple-explanation li.active{display:list-item}
+.simple-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.simple-controls p{width:100%;font-size:.9rem;margin:0}
+.learning-step>.simple-controls{display:none}body.easy-mode .learning-step>.simple-controls{display:flex}
+.message-example{margin:20px 0;padding:20px;border-left:4px solid var(--blue);background:var(--blueS);border-radius:0 12px 12px 0;color:var(--text)}
+.example-address{display:block;overflow-wrap:anywhere;font-size:.95rem;padding:14px;margin:10px 0;background:var(--bg);border:1px solid var(--line);border-radius:10px;white-space:normal}
+.practice-question{border:0;padding:0;margin:22px 0;min-width:0}.practice-question legend{font-weight:750;margin-bottom:14px;line-height:1.65}
+.answer-option{display:block;width:100%;min-height:56px;margin:10px 0;padding:16px;text-align:left;line-height:1.65;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--ink)}
+.answer-option:hover:not(:disabled){border-color:var(--blue);background:var(--blueS)}
+.answer-option.correct{border:2px solid var(--green);background:var(--greenS)}.answer-option.wrong{border:2px solid #a12c2c;background:#fff0f0}
+.answer-option:disabled{opacity:1;cursor:default}button:disabled:not(.answer-option){opacity:.6;cursor:not-allowed}
+.answer-feedback{padding:18px;border-left:4px solid var(--blue);background:var(--blueS);color:var(--text);line-height:1.8;margin:18px 0;border-radius:0 12px 12px 0}
+.simulator,.training-result{max-width:850px;margin:auto}.simulator h2{margin-top:24px}
+.chat-example{background:var(--greenS);padding:20px;border:1px solid var(--line);border-radius:16px;line-height:1.8}.chat-example p{color:var(--text);white-space:pre-line}.chat-example small{color:var(--text)}
+.safety-competency{margin-top:24px}.safety-competency h3{margin:14px 0 8px}.safety-competency .btn{margin-top:18px}
+.achievement.locked{background:var(--bg);border-style:dashed}.achievement p{font-size:.8rem;margin:10px 0 0}
+.legacy-simple{display:none}body.easy-mode .legacy-normal{display:none}body.easy-mode .legacy-simple{display:block}
+body.easy-mode .legacy-simple ol{padding-left:26px;line-height:1.9}body.easy-mode .legacy-simple li{margin:16px 0}
+body.high-contrast .hero,body.high-contrast .auth,body.high-contrast .xp,body.high-contrast .level{background:var(--navy);color:var(--white)}
+body.high-contrast .pill,body.high-contrast .training-notice,body.high-contrast .chat-example,body.high-contrast .message-example,body.high-contrast .answer-feedback{color:var(--ink);border:1px solid var(--ink)}
+body.high-contrast .cover{background:var(--blueS)}body.high-contrast .pill.orange{color:#733100}
+@media(max-width:639px){.topbar{height:auto;min-height:var(--top);flex-wrap:wrap;padding:8px 12px;gap:8px}.mobile-title{display:none}.top-actions .user{display:none}.top-actions{gap:6px}.topbar .btn{font-size:.8rem;padding:9px}.topbar .mobile{font-size:.8rem}.learning-step{margin:22px 0}.lesson-actions>*{width:100%}.lesson-actions{flex-direction:column}.safety-rule{padding:14px}.modal{padding:20px}.setting{gap:12px}.safety-page .lesson-content{padding:20px}.help-trigger{bottom:14px;right:14px}body.large-targets .topbar .btn,body.large-targets .topbar .mobile{padding:12px 8px;min-height:56px;font-size:.75rem}body.large-targets .topbar{gap:4px}.side-bottom{margin-top:22px}body.font-extra{--top:100px}body.large-targets{--top:88px}body.font-extra.large-targets{--top:120px}.safety-page .lesson-actions{gap:12px}}
+@media(min-width:980px){.safety-invite{grid-template-columns:1.6fr 1fr;align-items:center}.safety-page .lesson-layout{grid-template-columns:minmax(0,1fr) 300px}.safety-page .detail{grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.close-menu{margin-bottom:16px;flex-shrink:0}
+
+.video button{width:auto;min-width:70px;border-radius:14px;padding:14px 20px;font-size:1rem}
+
+/* Videoaulas: player responsivo, carregado apenas por escolha do aluno. */
+.video-frame{aspect-ratio:16/9;background:var(--navy,#102e52);display:grid;place-items:center;border-radius:12px;overflow:hidden;margin:18px 0}.video-frame iframe{width:100%;height:100%;border:0}.lesson-video{margin-bottom:24px}.lesson-content ol li{margin-bottom:12px}.lesson-side [aria-current="page"]{outline:2px solid var(--blue,#0b57d0);outline-offset:2px}.practice-question .answer-option[aria-pressed="true"]{outline:3px solid var(--blue,#0b57d0)}
+
+.certificate-paper{background:#fff;color:#173052;border:8px double #b68a36;padding:clamp(24px,6vw,70px);text-align:center;margin:24px auto;max-width:1000px;overflow-wrap:anywhere}.certificate-paper h2{font-size:clamp(1.8rem,4vw,3rem)}.certificate-paper h3{font-size:clamp(1.3rem,3vw,2rem);margin:24px 0}.certificate-name{display:block;font-size:clamp(1.6rem,4vw,2.8rem);margin:24px 0;border-bottom:1px solid #b68a36;padding-bottom:18px}.certificate-seal{font-size:3rem;color:#987021}.certificate-paper footer{margin-top:40px}.certificate-card{padding:24px}.certificate-card h2{margin-top:20px}.certificate-card .btn{margin-top:16px}
+@media print{@page{size:A4 landscape;margin:12mm}body:has(.certificate-paper){background:white!important}body:has(.certificate-paper)>*:not(#app){display:none!important}body:has(.certificate-paper) #app{display:block!important}body:has(.certificate-paper) .sidebar,body:has(.certificate-paper) .topbar,body:has(.certificate-paper) .backdrop,body:has(.certificate-paper) .help-trigger,body:has(.certificate-paper) .certificate-controls{display:none!important}body:has(.certificate-paper) #main{margin:0!important;padding:0!important}body:has(.certificate-paper) .main-page,body:has(.certificate-paper) .container{margin:0!important;padding:0!important;max-width:none!important}.certificate-paper{margin:0;width:100%;box-sizing:border-box;break-inside:avoid;padding:18mm;box-shadow:none}}

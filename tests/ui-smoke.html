@@ -1,0 +1,28 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Verificação de interface</title><style>body{margin:0}iframe{border:0;width:100%;height:100vh}pre{position:fixed;bottom:0;background:white;color:black;z-index:999;margin:0}</style><iframe src="../index.html" title="Se Conecte em teste"></iframe><pre id="verification">Executando</pre><script>
+const frame=document.querySelector('iframe');if(location.search.includes('mobile'))frame.style.width='390px';
+frame.onload=()=>{try{
+ const w=frame.contentWindow,d=w.document,results=[];
+ const check=(ok,name)=>{if(!ok)throw Error(name);results.push(name)};
+ const visible=el=>w.getComputedStyle(el).display!=='none'&&el.getClientRects().length>0;
+ w.SCStore.write('sc_onboarded',true);d.querySelector('#welcomeMode').close();w.login(false);check(visible(d.querySelector('#auth')),'login visível');check(!visible(d.querySelector('#app')),'painel oculto antes de entrar');
+ w.login(true);check(!visible(d.querySelector('#auth')),'login oculto após entrar');check(visible(d.querySelector('#app')),'painel visível');
+ for(const route of ['inicio','aprender','progresso','passaporte','oportunidades']){
+  w.history.replaceState(null,'','#/'+route);w.render();
+  check(visible(d.querySelector('#main .main-page')),'tela '+route);
+  check(!visible(d.querySelector('#auth')),'sem login em '+route);
+  check(d.querySelector('[aria-current="page"]').dataset.nav===route,'menu '+route);
+  check(d.querySelector('#main').dataset.page===route,'identificação '+route);
+  check(d.documentElement.scrollWidth<=w.innerWidth,'sem rolagem horizontal '+route);
+ }
+ w.history.replaceState(null,'','#/aprender');w.render();
+ const search=d.querySelector('#searchCourse');search.value='seguranca';search.oninput();check(d.querySelectorAll('#catalog .course').length===3,'busca sem acentos');
+ d.querySelector('#clearLearnFilters').click();d.querySelector('[data-status="new"]').click();check(d.querySelectorAll('#catalog .course').length===2,'não iniciados');
+ d.querySelector('[data-status="done"]').click();check(!!d.querySelector('.learn-empty'),'estado vazio');
+ d.querySelector('#clearLearnFilters').click();d.querySelector('[data-category="trabalho"]').click();check(d.querySelectorAll('#catalog .course').length===1,'categoria');
+ check(d.querySelector('#resumeLink').getAttribute('href')==='#/aula/internet/4','retomada');
+ for(const route of ['curso/internet','aula/internet/4','exercicio/internet','resultado/internet','perfil']){w.history.replaceState(null,'','#/'+route);w.render();check(visible(d.querySelector('#main .main-page')),'rota '+route)}
+ d.querySelector('#logout').click();check(visible(d.querySelector('#auth'))&&!visible(d.querySelector('#app')),'sair');
+ w.login(true);w.history.replaceState(null,'','#/inicio');w.render();
+ document.querySelector('#verification').textContent='PASS ('+results.length+') '+results.join(' | ');
+}catch(e){document.querySelector('#verification').textContent='FAIL '+e.stack}};
+</script></html>
