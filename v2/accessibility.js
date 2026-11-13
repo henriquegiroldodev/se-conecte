@@ -3,7 +3,7 @@
  const defaults={font:0,contrast:false,motion:false,targets:false,easy:false};
  let prefs={...defaults};
  let speaking=false;
- const key=()=>'sc-v2-accessibility-'+(window.state?.usuario?.id||'guest');
+ const key=()=>'sc-v2-accessibility-'+(window.SCActiveUserId||'guest');
  const q=s=>document.querySelector(s);
  const template=()=>'<div class="a11y-actions" aria-label="Ferramentas de acessibilidade"><button type="button" class="btn" id="accessBtn" aria-haspopup="dialog">Meu Modo</button><button type="button" class="btn" id="listenBtn">Ouvir página</button></div><dialog id="accessDialog" aria-labelledby="accessTitle"><div class="a11y-dialog"><div class="a11y-dialog-heading"><div><div class="eyebrow">ACESSIBILIDADE</div><h2 id="accessTitle">Meu Modo</h2><p>Personalize a plataforma para aprender no seu ritmo.</p></div><button type="button" class="btn" id="accessClose">Fechar</button></div><div class="a11y-group"><strong>Tamanho do texto</strong><div role="group" aria-label="Tamanho do texto" class="a11y-font"><button type="button" data-font="0" class="btn">A</button><button type="button" data-font="1" class="btn">A+</button><button type="button" data-font="2" class="btn">A++</button></div></div><label class="a11y-option"><span>Alto contraste<small>Aumenta a diferença entre texto e fundo</small></span><input type="checkbox" data-a11y="contrast"></label><label class="a11y-option"><span>Reduzir animações<small>Evita transições e movimentos desnecessários</small></span><input type="checkbox" data-a11y="motion"></label><label class="a11y-option"><span>Botões maiores<small>Facilita cliques e toques</small></span><input type="checkbox" data-a11y="targets"></label><label class="a11y-option"><span>Leitura simplificada<small>Mais espaço entre linhas nas aulas</small></span><input type="checkbox" data-a11y="easy"></label><div class="a11y-dialog-footer"><button type="button" class="btn" id="accessReset">Restaurar padrão</button><button type="button" class="btn primary" id="accessDone">Concluir</button></div></div></dialog>';
  const style=document.createElement('style');
@@ -30,7 +30,7 @@
  function init(){
   document.head.appendChild(style);
   const holder=document.createElement('div');holder.innerHTML=template();
-  const header=q('.top .nav');header?.prepend(holder.querySelector('.a11y-actions'));document.body.appendChild(holder.querySelector('dialog'));
+  const header=q('.top');header?.insertBefore(holder.querySelector('.a11y-actions'),q('.top .nav'));document.body.appendChild(holder.querySelector('dialog'));
   const dialog=q('#accessDialog');
   q('#accessBtn').onclick=()=>dialog.showModal();
   q('#listenBtn').onclick=listen;
