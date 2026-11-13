@@ -2,7 +2,7 @@
 
 ## Design restaurado
 
-A interface da v2 recupera a identidade da primeira versão: painel do aluno com destaque azul, menu lateral, cards coloridos, página de progresso e layout de login com duas colunas. A API real, os vídeos e certificados permanecem na v2. Os estilos adicionais estão em `v2/theme-original.css`; a antiga interface demonstrativa segue arquivada em `legacy.html`.
+A interface da v2 recupera a identidade da primeira versão: painel do aluno com destaque azul, menu lateral, cards coloridos, página de progresso, Passaporte Digital e layout de login com duas colunas. A API real, os vídeos e certificados permanecem na v2. Os estilos adicionais estão em `v2/theme-original.css`; a antiga interface demonstrativa segue arquivada em `legacy.html`.
 
 
 A versão principal agora abre a plataforma de cursos na pasta `v2/`. A versão demonstrativa anterior foi preservada em `legacy.html` apenas como referência e não deve ser usada para avaliar progresso real.
@@ -73,7 +73,7 @@ Testar cadastro, login, conclusão de aulas, certificados e mídia em PHP/MySQL 
 1. Cadastre uma conta nova e confira que os dois cursos começam em 0%.
 2. Abra **Meu Modo**, aumente a fonte e ative alto contraste; feche e reabra para verificar o estado.
 3. Clique **Ouvir página** em um navegador compatível com síntese de voz.
-4. Abra **Banco de Talentos**, salve cidade, objetivo e habilidades; recarregue para confirmar que os dados foram mantidos.
+4. Abra **Banco de Talentos**, salve cidade, objetivo e habilidades; recarregue para confirmar que os dados foram mantidos. Confira também o **Passaporte Digital**, calculado a partir de conclusões reais.
 5. Faça logout, crie outra conta e verifique que o perfil profissional da primeira conta não aparece.
 6. Conclua as atividades e confira o progresso e a emissão do certificado no banco.
 7. Verifique o layout no celular e no computador.
