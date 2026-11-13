@@ -34,6 +34,13 @@ try {
    $q=$pdo->prepare('SELECT a.id,a.titulo,a.conteudo,a.video_url,a.atividade_pergunta,a.opcao_a,a.opcao_b,a.opcao_c,a.ordem,IF(ac.aula_id IS NOT NULL,1,0) concluida FROM sc_aulas a LEFT JOIN sc_aulas_concluidas ac ON ac.aula_id=a.id AND ac.usuario_id=? WHERE a.curso_id=? ORDER BY a.ordem');
    $q->execute([$id,$course['id']]);reply(['curso'=>$course,'aulas'=>$q->fetchAll()]);
  }
+ if($method==='GET' && $action==='talento') {
+   $id=requireUser();
+   $q=$pdo->prepare('SELECT cidade,objetivo,habilidades,disponibilidade,autorizo_contato,atualizado_em FROM sc_talentos WHERE usuario_id=?');
+   $q->execute([$id]);$profile=$q->fetch();
+   $jobs=$pdo->query('SELECT id,titulo,empresa,modalidade,cidade,descricao FROM vagas WHERE ativa=1 ORDER BY id DESC LIMIT 20')->fetchAll();
+   reply(['perfil'=>$profile?:null,'vagas_demonstrativas'=>$jobs]);
+ }
  if($method!=='POST')reply(['erro'=>'Método não permitido'],405);
  $d=payload();
  if(!hash_equals((string)($_SESSION['csrf']??''),(string)($_SERVER['HTTP_X_CSRF_TOKEN']??'')) || empty($_SESSION['csrf']))reply(['erro'=>'Sessão expirada. Recarregue a página.'],419);
@@ -56,6 +63,17 @@ try {
  }
  if($action==='logout') {$_SESSION=[];session_regenerate_id(true);reply(['ok'=>true]);}
  $id=requireUser();
+ if($action==='talento_salvar') {
+   $city=trim((string)($d['cidade']??''));
+   $objective=trim((string)($d['objetivo']??''));
+   $skills=trim((string)($d['habilidades']??''));
+   $mode=(string)($d['disponibilidade']??'qualquer');
+   $consent=($d['autorizo_contato']??false)===true;
+   if(mb_strlen($city)>120||mb_strlen($objective)>180||mb_strlen($skills)>1500||!in_array($mode,['presencial','remoto','hibrido','qualquer'],true))reply(['erro'=>'Revise os dados do perfil.'],422);
+   $q=$pdo->prepare('INSERT INTO sc_talentos(usuario_id,cidade,objetivo,habilidades,disponibilidade,autorizo_contato) VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE cidade=VALUES(cidade),objetivo=VALUES(objetivo),habilidades=VALUES(habilidades),disponibilidade=VALUES(disponibilidade),autorizo_contato=VALUES(autorizo_contato)');
+   $q->execute([$id,$city,$objective,$skills,$mode,(int)$consent]);
+   reply(['ok'=>true,'mensagem'=>'Perfil do Banco de Talentos salvo.']);
+ }
  if($action==='lesson') {
    $lessonId=filter_var($d['aula_id']??null,FILTER_VALIDATE_INT);
    $answer=$d['resposta']??null;
