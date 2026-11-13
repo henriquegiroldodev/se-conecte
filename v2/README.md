@@ -1,5 +1,10 @@
 # Se Conecte — Plataforma de Cursos
 
+## Design restaurado
+
+A interface da v2 recupera a identidade da primeira versão: painel do aluno com destaque azul, menu lateral, cards coloridos, página de progresso e layout de login com duas colunas. A API real, os vídeos e certificados permanecem na v2. Os estilos adicionais estão em `v2/theme-original.css`; a antiga interface demonstrativa segue arquivada em `legacy.html`.
+
+
 A versão principal agora abre a plataforma de cursos na pasta `v2/`. A versão demonstrativa anterior foi preservada em `legacy.html` apenas como referência e não deve ser usada para avaliar progresso real.
 
 ## Cursos disponíveis
