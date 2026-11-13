@@ -38,8 +38,7 @@ try {
    $id=requireUser();
    $q=$pdo->prepare('SELECT cidade,objetivo,habilidades,disponibilidade,autorizo_contato,atualizado_em FROM sc_talentos WHERE usuario_id=?');
    $q->execute([$id]);$profile=$q->fetch();
-   $jobs=$pdo->query('SELECT id,titulo,empresa,modalidade,cidade,descricao FROM vagas WHERE ativa=1 ORDER BY id DESC LIMIT 20')->fetchAll();
-   reply(['perfil'=>$profile?:null,'vagas_demonstrativas'=>$jobs]);
+   reply(['perfil'=>$profile?:null]);
  }
  if($method!=='POST')reply(['erro'=>'Método não permitido'],405);
  $d=payload();
