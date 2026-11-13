@@ -31,7 +31,7 @@ try {
    $slug=(string)($_GET['slug']??'');
    $q=$pdo->prepare('SELECT id,slug,titulo,descricao,duracao_minutos FROM sc_cursos WHERE slug=? AND ativo=1');$q->execute([$slug]);$course=$q->fetch();
    if(!$course)reply(['erro'=>'Curso não encontrado.'],404);
-   $q=$pdo->prepare('SELECT a.id,a.titulo,a.conteudo,a.atividade_pergunta,a.opcao_a,a.opcao_b,a.opcao_c,a.ordem,IF(ac.aula_id IS NOT NULL,1,0) concluida FROM sc_aulas a LEFT JOIN sc_aulas_concluidas ac ON ac.aula_id=a.id AND ac.usuario_id=? WHERE a.curso_id=? ORDER BY a.ordem');
+   $q=$pdo->prepare('SELECT a.id,a.titulo,a.conteudo,a.video_url,a.atividade_pergunta,a.opcao_a,a.opcao_b,a.opcao_c,a.ordem,IF(ac.aula_id IS NOT NULL,1,0) concluida FROM sc_aulas a LEFT JOIN sc_aulas_concluidas ac ON ac.aula_id=a.id AND ac.usuario_id=? WHERE a.curso_id=? ORDER BY a.ordem');
    $q->execute([$id,$course['id']]);reply(['curso'=>$course,'aulas'=>$q->fetchAll()]);
  }
  if($method!=='POST')reply(['erro'=>'Método não permitido'],405);
