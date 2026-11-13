@@ -1,3 +1,13 @@
-const C='se-conecte-v8',A=['./','./index.html','./assets/css/styles.css','./assets/js/data.js','./assets/css/inclusion.css','./assets/js/storage.js','./assets/js/safety-data.js','./assets/js/learning-progress.js','./assets/js/speech.js','./assets/js/accessibility.js','./assets/js/help.js','./assets/js/safety.js','./assets/js/navigation.js','./assets/js/video-lessons.js','./assets/js/certificates.js','./assets/js/app.js','./manifest.webmanifest'];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
-
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('se-conecte-')&&key!==C).map(key=>caches.delete(key))))));
+// Se Conecte v2: não armazenar API, sessões ou dados pessoais em cache.
+const CACHE='se-conecte-v9';
+const STATIC=['./assets/brand/icon.svg','./assets/brand/logo-horizontal.svg','./assets/brand/logo-completa.svg','./v2/theme-original.css','./v2/accessibility.js'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC)).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('se-conecte-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
+self.addEventListener('fetch',e=>{
+ const req=e.request;
+ if(req.method!=='GET')return;
+ const u=new URL(req.url);
+ if(u.origin!==self.location.origin)return;
+ if(u.pathname.endsWith('.php')||u.pathname.endsWith('/index.html')||u.pathname.endsWith('/v2/')||u.pathname.endsWith('/se-conecte/'))return;
+ e.respondWith(fetch(req).catch(()=>caches.match(req)));
+});
