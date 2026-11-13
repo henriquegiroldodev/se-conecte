@@ -1,17 +1,16 @@
 # Se Conecte — Plataforma de Cursos
 
-## Design restaurado
+## Aparência antiga, funcionalidades novas
 
-A interface da v2 recupera a identidade da primeira versão: painel do aluno com destaque azul, menu lateral, cards coloridos, página de progresso, Passaporte Digital e layout de login com duas colunas. A API real, os vídeos e certificados permanecem na v2. Os estilos adicionais estão em `v2/theme-original.css`; a antiga interface demonstrativa segue arquivada em `legacy.html`.
+O projeto usa a identidade visual original como referência: azul e laranja, logo, menu lateral, cards e painel inicial. A implementação é a **v2 conectada ao MySQL**, e não a interface antiga de demonstração.
 
-
-A versão principal agora abre a plataforma de cursos na pasta `v2/`. A versão demonstrativa anterior foi preservada em `legacy.html` apenas como referência e não deve ser usada para avaliar progresso real.
+Escopo funcional: cadastro/login real; **somente dois cursos**; progresso individual; player de vídeos pronto; exercícios; acessibilidade; Banco de Talentos privado; certificado digital ligado à conta. Não foram restaurados pontos, níveis fictícios, Passaporte Digital separado, catálogo antigo ou vagas de exemplo.
 
 ## Acessibilidade e Banco de Talentos
 
 - A barra superior oferece **Meu Modo** (texto A/A+/A++, alto contraste, animações reduzidas, botões maiores e leitura simplificada) e **Ouvir página**, que utiliza as vozes disponíveis no navegador. As preferências são armazenadas localmente por conta, nesse navegador.
 - O menu lateral inclui **Banco de Talentos**. O aluno cadastra cidade, objetivo, habilidades e modalidade de trabalho. O perfil é privado e salvo no MySQL; existe uma caixa opcional de autorização de contato para uso futuro, que não publica os dados.
-- As vagas mostradas são **apenas exemplos**, identificados como demonstrativos. Não existe candidaturas reais, contato com empresas ou divulgação pública de perfis nesta etapa.
+- O Banco de Talentos é um cadastro privado de habilidades, não uma vitrine pública. Não existem candidaturas reais nem vagas demonstrativas na interface.
 
 **Migração necessária para o Banco de Talentos:** após os scripts 003 e 004, importe `database/006_banco_talentos.sql` uma única vez. Este script cria `sc_talentos` e não apaga usuários, cursos, progresso ou certificados.
 
@@ -54,7 +53,7 @@ A rota `#/certificado-modelo` mostra uma **prévia ilustrativa com marca d'água
 ## Estrutura
 
 - `index.html`: encaminha à versão profissional `v2/`.
-- `legacy.html`: versão demonstrativa antiga, arquivada.
+
 - `v2/index.html`: interface responsiva, cursos, player, certificado.
 - `v2/api.php`: contas, progresso e Banco de Talentos autenticados.
 - `v2/accessibility.js`: recursos de acessibilidade e leitura em voz alta.
@@ -73,7 +72,7 @@ Testar cadastro, login, conclusão de aulas, certificados e mídia em PHP/MySQL 
 1. Cadastre uma conta nova e confira que os dois cursos começam em 0%.
 2. Abra **Meu Modo**, aumente a fonte e ative alto contraste; feche e reabra para verificar o estado.
 3. Clique **Ouvir página** em um navegador compatível com síntese de voz.
-4. Abra **Banco de Talentos**, salve cidade, objetivo e habilidades; recarregue para confirmar que os dados foram mantidos. Confira também o **Passaporte Digital**, calculado a partir de conclusões reais.
+4. Abra **Banco de Talentos**, salve cidade, objetivo e habilidades; recarregue para confirmar que os dados foram mantidos. Confira as certificações na página **Meus certificados**.
 5. Faça logout, crie outra conta e verifique que o perfil profissional da primeira conta não aparece.
 6. Conclua as atividades e confira o progresso e a emissão do certificado no banco.
 7. Verifique o layout no celular e no computador.
