@@ -32,6 +32,18 @@ O catálogo exibe **somente esses dois cursos**. Para novas contas, o progresso 
 
 **Limpar progresso de teste:** o arquivo `database/005_reset_dados_demo.sql` remove **todos os registros de aulas concluídas e certificados da v2 de todas as contas**. Ele é DESTRUTIVO e deve ser executado manualmente apenas em ambiente de testes, após backup, caso deseje zerar contas já existentes. Não é executado automaticamente pela aplicação. A conta e os cursos são preservados.
 
+## Ativação do banco de dados e vídeo de teste
+
+Se o Se Conecte **já abre no XAMPP** e você já importou os arquivos 003, 004 e 006, **não recrie o banco**. Atualize os arquivos do projeto e importe **apenas** `database/007_videoaulas_iniciais.sql`, em phpMyAdmin → banco `se_conecte` → Importar.
+
+O script 007 apenas cadastra um link do YouTube para a primeira aula de cada curso, **se o campo ainda estiver vazio**. Ele não apaga contas, progresso, certificado ou perfil profissional e não substitui vídeos já escolhidos.
+
+Para verificar o ambiente, abra `http://localhost/se-conecte/v2/diagnostico.php`. A página mostra se PHP, MySQL, tabelas, campo `video_url` e vídeos cadastrados estão disponíveis. Ela não exibe senhas nem nomes de alunos. **Remova ou restrinja o diagnóstico antes de publicar em um servidor aberto.**
+
+Em uma instalação nova, use esta ordem: `database/se_conecte.sql`, `003_plataforma_profissional.sql`, `004_cursos_videos.sql`, `006_banco_talentos.sql`, `007_videoaulas_iniciais.sql`.
+
+Os vídeos de referência são de canais externos (Prime Cursos do Brasil e Curso em Vídeo). Confira se permitem incorporação. O certificado emitido é do **Se Conecte**, e não dos produtores desses vídeos.
+
 ## Como adicionar vídeos
 
 O player já está incluído em cada aula. Sem URL, aparece um aviso "Videoaula em preparação", sem vídeo fictício.
@@ -44,7 +56,7 @@ UPDATE sc_aulas SET video_url='https://www.youtube.com/watch?v=XXXXXXXXXXX'
 WHERE curso_id=(SELECT id FROM sc_cursos WHERE slug='primeiros-passos') AND ordem=1;
 ```
 
-Substitua `XXXXXXXXXXX` pelo ID real do vídeo. São suportadas URLs HTTPS de YouTube (`watch`, `youtu.be` ou `embed`) e arquivos locais da mesma origem com extensão `.mp4` ou `.webm`. Não use URLs de serviços desconhecidos. O vídeo aparecerá automaticamente após recarregar a página.
+Substitua `XXXXXXXXXXX` pelo ID real do vídeo. Na primeira aula dos dois cursos, o arquivo 007 preenche exemplos se o campo ainda estiver vazio. São suportadas URLs HTTPS de YouTube (`watch`, `youtu.be` ou `embed`) e arquivos locais da mesma origem com extensão `.mp4` ou `.webm`. Não use URLs de serviços desconhecidos. O vídeo aparecerá automaticamente após recarregar a página.
 
 ## Certificado digital
 
@@ -78,3 +90,14 @@ Testar cadastro, login, conclusão de aulas, certificados e mídia em PHP/MySQL 
 7. Verifique o layout no celular e no computador.
 
 Os testes de integração com o MySQL do computador precisam ser executados localmente; os arquivos no GitHub não alteram automaticamente o banco já importado no XAMPP.
+
+## Teste de aceitação antes de entregar
+
+1. Abra `v2/diagnostico.php` e verifique todos os itens. Se faltar tabela, importe a migração indicada.
+2. Crie uma conta nova e confira que ambos os cursos iniciam em 0%.
+3. Entre na primeira aula de **Uso Básico do Computador** e confirme o player do YouTube. Repita para **Segurança na Internet e no Celular**.
+4. Responda incorretamente à atividade e confirme que a aula não é concluída. Depois responda corretamente e verifique o progresso ao recarregar.
+5. Conclua as quatro aulas, abra **Meus certificados**, confira a vinculação à conta e experimente **Imprimir/Salvar como PDF**.
+6. Salve um perfil no **Banco de Talentos**, saia e entre novamente para conferir persistência. Em outra conta, confira que o perfil não aparece.
+7. Teste acessibilidade (Meu Modo, tamanho do texto, contraste e leitura por voz) e a navegação no celular.
+8. Para entrega pública, ainda são necessários HTTPS, limite de tentativas de login, política LGPD, recuperação de senha e revisão de segurança.
