@@ -15,6 +15,7 @@ $results.=row('Extensão pdo_mysql',$pdoOk,$pdoOk?'Extensão disponível':'Habil
 $dbOk=false;
 if($pdoOk){
  try{
+   $scDiagnostic=true;
    require dirname(__DIR__).'/backend/config.php';
    $dbOk=isset($pdo)&&$pdo instanceof PDO;
  }catch(Throwable $e){error_log('Se Conecte diagnostico: '.$e->getMessage());}
