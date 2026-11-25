@@ -48,17 +48,25 @@ async function loadCourse(slug){if(!state.detalhes[slug])state.detalhes[slug]=aw
 function courseView(data){const c=data.curso,lessons=data.aulas,done=lessons.filter(a=>Number(a.concluida)).length;return '<a class="back" href="#/">Voltar aos cursos</a>'+header('Curso · '+c.duracao_minutos+' min',escapeHTML(c.titulo),escapeHTML(c.descricao))+'<div class="detail"><div class="card"><h2>Conteúdo do curso</h2><p class="muted">Complete a atividade de cada aula para avançar. Você pode revisar as aulas quantas vezes quiser.</p>'+lessons.map(a=>'<a class="lesson" href="#/aula/'+encodeURIComponent(c.slug)+'/'+a.id+'"><strong>'+a.ordem+'. '+escapeHTML(a.titulo)+'</strong><small>'+(Number(a.concluida)?'Concluída':'Pendente')+'</small></a>').join('')+'</div><aside class="card side"><h2>Seu progresso</h2><p class="muted">'+done+' de '+lessons.length+' aulas concluídas</p><div class="meter"><span style="width:'+(lessons.length?Math.round(done/lessons.length*100):0)+'%"></span></div>'+(done===lessons.length?'<p><a href="#/certificados">Ver certificado</a></p>':'<p class="muted">Seu certificado será emitido ao concluir todas as aulas.</p>')+'</aside></div>';}
 function videoPlayer(url) {
  const source=String(url||'').trim();
- let embed='';
+ let embed='',fallback='';
  try {
-   const u=new URL(source,location.origin);
-   if(['www.youtube.com','youtube.com','m.youtube.com','youtu.be','www.youtube-nocookie.com'].includes(u.hostname) && u.protocol==='https:'){
-     let id=u.hostname==='youtu.be'?u.pathname.slice(1).split('/')[0]:(u.searchParams.get('v')||(u.pathname.match(/^\/(?:embed|shorts)\/([a-zA-Z0-9_-]{11})/)||[])[1]);
-     if(/^[a-zA-Z0-9_-]{11}$/.test(id||''))embed='<iframe title="Videoaula" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen src="https://www.youtube-nocookie.com/embed/'+id+'"></iframe>';
-   } else if ((u.origin===location.origin && !source.startsWith('//')) && /\.(mp4|webm)(?:\?.*)?$/i.test(u.pathname)) {
-     embed='<video controls preload="metadata" playsinline src="'+escapeHTML(u.href)+'">Seu navegador não suporta vídeo.</video>';
+   const u=new URL(source,location.href);
+   const host=u.hostname.toLowerCase();
+   if(u.protocol==='https:' && ['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtube-nocookie.com'].includes(host)){
+     const match=u.pathname.match(/^\/(?:embed|shorts|live)\/([a-zA-Z0-9_-]{11})(?:\/|$)/);
+     const id=host==='youtu.be'?u.pathname.split('/')[1]:(u.searchParams.get('v')||(match&&match[1]));
+     if(/^[a-zA-Z0-9_-]{11}$/.test(id||'')){
+       const youtube='https://www.youtube.com/watch?v='+id;
+       embed='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0" title="Videoaula do YouTube" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+       fallback='<p class="video-external">Se o YouTube não permitir a reprodução incorporada, <a href="'+youtube+'" target="_blank" rel="noopener noreferrer">assista ao vídeo no YouTube</a>.</p>';
+     }
+   } else if(u.origin===location.origin && ['http:','https:'].includes(u.protocol) && /\.(mp4|webm)$/i.test(u.pathname)){
+     embed='<video controls preload="metadata" playsinline src="'+escapeHTML(u.href)+'">Seu navegador não suporta vídeos HTML5.</video>';
+     fallback='<p class="video-external"><a target="_blank" rel="noopener noreferrer" href="'+escapeHTML(u.href)+'">Abrir vídeo em outra aba</a></p>';
    }
  } catch(e){}
- return '<section aria-label="Videoaula" class="video-box">'+(embed||'<div class="video-placeholder"><strong>Videoaula em preparação</strong><p>O espaço do player está pronto. O vídeo será exibido aqui quando a equipe inserir o link desta aula no banco de dados.</p></div>')+'</section>';
+ if(!embed)return '<section aria-label="Videoaula" class="video-box"><div class="video-placeholder"><strong>Videoaula em preparação</strong><p>Assim que uma URL do YouTube ou um arquivo MP4/WebM for cadastrado, o vídeo aparecerá aqui.</p></div></section>';
+ return '<section aria-label="Videoaula"><div class="video-box">'+embed+'</div>'+fallback+'</section>';
 }
 function lessonView(data,id){const l=data.aulas.find(a=>a.id===Number(id));if(!l)return '<h1>Aula não encontrada</h1><a href="#/curso/'+encodeURIComponent(data.curso.slug)+'">Voltar ao curso</a>';return '<a class="back" href="#/curso/'+encodeURIComponent(data.curso.slug)+'">Voltar ao curso</a>'+header('Aula '+l.ordem,escapeHTML(l.titulo),escapeHTML(data.curso.titulo))+'<div class="detail"><section class="card"><h2>Videoaula</h2>'+videoPlayer(l.video_url)+'<h2>O que você vai aprender</h2><div class="content">'+escapeHTML(l.conteudo)+'</div><hr style="border:0;border-top:1px solid #e6e9ef;margin:28px 0"><h2>Atividade de fixação</h2><p>'+escapeHTML(l.atividade_pergunta)+'</p><form id="lessonForm">'+['A','B','C'].map(k=>'<label class="choice"><input type="radio" name="resposta" value="'+k+'" required>'+escapeHTML(l['opcao_'+k.toLowerCase()])+'</label>').join('')+'<button class="btn primary" type="submit">'+(Number(l.concluida)?'Revisar resposta':'Concluir aula')+'</button></form><div id="message" role="status" aria-live="polite"></div></section><aside class="card side"><div class="tag">Material de estudo</div><h2>Aprenda no seu ritmo</h2><p class="muted">Leia com calma e responda à atividade. Se errar, revise o conteúdo e tente novamente.</p></aside></div>';}
 function certificateView(rec){const date=new Date(rec.emitido_em.replace(' ','T')).toLocaleDateString('pt-BR');return '<div class="noprint"><a class="back" href="#/certificados">Voltar aos certificados</a><h1>Certificado de conclusão</h1><p class="muted">Para baixar, escolha “Salvar como PDF” na janela de impressão.</p></div><article class="cert"><img class="cert-logo" src="../assets/brand/logo-horizontal.svg" alt="Se Conecte"><div class="eyebrow">Educação digital</div><h2>Certificado de conclusão</h2><p>Certificamos que</p><div class="cert-name">'+escapeHTML(rec.nome_emitido)+'</div><p>concluiu o curso</p><div class="cert-course">'+escapeHTML(rec.titulo_emitido)+'</div><p>com '+rec.total_aulas+' aulas, na plataforma Se Conecte.</p><p>Emitido em '+date+'</p><div style="border-top:1px solid #d4dff3;margin:35px auto 15px;max-width:440px;padding-top:18px"><strong>Se Conecte</strong><p class="cert-code">Código único: '+escapeHTML(rec.codigo)+'</p></div></article><div class="noprint"><button class="btn primary" id="print">Imprimir / Salvar como PDF</button></div>';}
