@@ -19,7 +19,7 @@ function nav(){
  document.body.classList.toggle('signed-in',logged);
  $('#nav').innerHTML=logged?'<span class="muted" id="greeting"></span><button id="logout" class="btn">Sair</button>':'<a href="#/">Cursos</a><a href="#/entrar">Entrar</a><a class="btn primary" href="#/cadastro">Criar perfil</a>';
  const page=(location.hash||'#/').slice(2).split('/')[0];
- const items=[['','Início'],['progresso','Meu progresso'],['talentos','Banco de Talentos'],['certificados','Meus certificados'],['conta','Meu perfil']];
+ const items=[['','Início'],...(state.usuario?.id==='sc-local-admin'?[['admin','Painel administrativo']]:[]),['progresso','Meu progresso'],['talentos','Banco de Talentos'],['certificados','Meus certificados'],['conta','Meu perfil']];
  $('#sideNav').innerHTML=logged?items.map(([p,label])=>'<a href="#/'+p+'" '+(page===p?'aria-current="page"':'')+'>'+label+'</a>').join(''):'';
  if(logged){$('#greeting').textContent='Olá, '+state.usuario.nome.split(' ')[0];$('#logout').onclick=async()=>{try{await api('logout',{});await refresh();location.hash='#/';render();}catch(e){alert(e.message)}};}
  function closeMenu(){document.body.classList.remove('menu-open');$('#menuToggle').setAttribute('aria-expanded','false')}
@@ -105,12 +105,41 @@ function progressView(){
 }
 function certificatePreview(){return '<div class="noprint"><a class="back" href="#/certificados">Voltar aos certificados</a><h1>Modelo de certificado digital</h1><p class="muted">Prévia do layout do certificado. A emissão acontece após a conclusão do curso.</p></div><article class="cert"><img class="cert-logo" src="../assets/brand/logo-horizontal.svg" alt="Se Conecte"><div class="demo-watermark">MODELO</div><div class="eyebrow">Educação digital</div><h2>Certificado de conclusão</h2><p>Certificamos que</p><div class="cert-name">Nome completo do aluno</div><p>concluiu o curso</p><div class="cert-course">Uso Básico do Computador</div><p>com 4 aulas, na plataforma Se Conecte.</p><p>Data de emissão: DD/MM/AAAA</p><div style="border-top:1px solid #d4dff3;margin:35px auto 15px;max-width:440px;padding-top:18px"><strong>Se Conecte</strong><p class="cert-code">Código: GERADO APÓS CONCLUSÃO</p></div></article><p class="noprint muted">O certificado definitivo é gerado automaticamente e disponível no seu perfil após a conclusão das aulas.</p>';}
 function certs(){return header('Sua formação','Meus certificados','Os certificados são emitidos automaticamente após a conclusão de todas as aulas e ficam disponíveis neste navegador.')+'<p><a class="btn" href="#/certificado-modelo">Visualizar modelo de certificado</a></p>'+(state.certificados.length?'<div class="grid">'+state.certificados.map(r=>'<article class="card"><span class="tag">Curso concluído</span><h2>'+escapeHTML(r.titulo_emitido)+'</h2><p class="muted">'+escapeHTML(r.nome_emitido)+'</p><a class="btn primary" href="#/certificado/'+encodeURIComponent(r.codigo)+'">Ver certificado</a></article>').join('')+'</div>':'<div class="card empty"><h2>Você ainda não possui certificados</h2><p class="muted">Conclua um dos cursos para receber seu primeiro certificado.</p><a class="btn primary" href="#/">Explorar cursos</a></div>');}
+function adminPage(data){
+ const n=data.indicadores;
+ const stat=(title,value)=>'<article class="card admin-stat"><span class="muted">'+title+'</span><strong>'+value+'</strong></article>';
+ const rows=data.alunos.map(p=>'<tr><td><strong>'+escapeHTML(p.nome)+'</strong><small>'+escapeHTML(p.email)+'</small></td><td>'+p.aulas+' / 8</td><td>'+p.certificados+'</td><td>'+(p.tem_talento?'Sim':'Não')+'</td><td><div class="admin-actions"><button class="btn" type="button" data-admin-reset="'+escapeHTML(p.id)+'">Zerar progresso</button><button class="btn admin-danger" type="button" data-admin-remove="'+escapeHTML(p.id)+'">Remover</button></div></td></tr>').join('');
+ const courses=data.cursos.map(c=>'<li><strong>'+escapeHTML(c.titulo)+'</strong><span>'+c.aulas+' aulas · '+c.duracao_minutos+' minutos</span></li>').join('');
+ return header('Administração local','Painel administrativo','Acompanhe o uso e os perfis salvos neste navegador.')
+  +'<div class="notice admin-warning"><strong>Ambiente de demonstração local.</strong> Este painel não acessa outros dispositivos e não possui permissões de servidor. O usuário admin/admin não é adequado para dados reais.</div>'
+  +'<section class="admin-stats" aria-label="Indicadores do navegador">'+stat('Alunos locais',n.alunos)+stat('Aulas concluídas',n.aulas_concluidas)+stat('Certificados emitidos',n.certificados)+stat('Perfis de talentos',n.talentos)+'</section>'
+  +'<section class="card admin-section"><div class="admin-section-heading"><div><span class="tag">GESTÃO DE ALUNOS</span><h2>Perfis registrados</h2></div><span class="muted">'+data.alunos.length+' aluno(s) neste navegador</span></div><p class="muted">Zerar progresso remove as aulas concluídas e os certificados do perfil local. Remover exclui o perfil deste dispositivo.</p>'
+  +(rows?'<div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Aluno</th><th>Aulas</th><th>Certificados</th><th>Talentos</th><th>Ações</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty"><p>Nenhum aluno foi cadastrado neste navegador.</p></div>')+'</section>'
+  +'<section class="card admin-section"><span class="tag">CATÁLOGO DE CURSOS</span><h2>Cursos disponíveis</h2><ul class="admin-courses">'+courses+'</ul><p class="muted">O conteúdo dos cursos é definido nos arquivos do projeto. Esta versão não possui edição de aulas pelo painel.</p></section>';
+}
+function bindAdmin(){
+ const section=$('#content');
+ section.querySelectorAll('[data-admin-reset]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const id=btn.dataset.adminReset;
+  if(!confirm('Zerar as aulas e os certificados deste aluno neste navegador? Esta ação não pode ser desfeita.'))return;
+  btn.disabled=true;
+  try{await api('admin_reset_progress',{id});await render();}catch(e){alert(e.message);btn.disabled=false;}
+ }));
+ section.querySelectorAll('[data-admin-remove]').forEach(btn=>btn.addEventListener('click',async()=>{
+  const id=btn.dataset.adminRemove;
+  if(!confirm('Remover permanentemente este perfil deste navegador? Esta ação não pode ser desfeita.'))return;
+  btn.disabled=true;
+  try{await api('admin_delete_profile',{id});await render();}catch(e){alert(e.message);btn.disabled=false;}
+ }));
+}
+
 async function render(){nav();const parts=(location.hash||'#/').slice(2).split('/');const page=parts[0],main=$('#content');main.innerHTML='<p class="muted">Carregando...</p>';try{
  if(!state.usuario&& !['','entrar','cadastro','certificado-modelo'].includes(page)){location.hash='#/entrar';return;}
- if(state.usuario&&['entrar','cadastro'].includes(page)){location.hash='#/';return;}
- if(page==='entrar'||page==='cadastro'){const reg=page==='cadastro';main.innerHTML=auth(reg);$('#authForm').onsubmit=async e=>{e.preventDefault();const btn=$('#authForm button');btn.disabled=true;try{const fd=new FormData(e.currentTarget);await api(reg?'register':'login',Object.fromEntries(fd));await refresh();location.hash='#/';render();}catch(err){note(err.message,true)}finally{btn.disabled=false;}};}
+ if(state.usuario&&['entrar','cadastro'].includes(page)){location.hash=state.usuario.id==='sc-local-admin'?'#/admin':'#/';return;}
+ if(page==='entrar'||page==='cadastro'){const reg=page==='cadastro';main.innerHTML=auth(reg);$('#authForm').onsubmit=async e=>{e.preventDefault();const btn=$('#authForm button');btn.disabled=true;try{const fd=new FormData(e.currentTarget);await api(reg?'register':'login',Object.fromEntries(fd));await refresh();location.hash=state.usuario?.id==='sc-local-admin'?'#/admin':'#/';render();}catch(err){note(err.message,true)}finally{btn.disabled=false;}};}
  else if(page==='curso'&&parts[1])main.innerHTML=courseView(await loadCourse(decodeURIComponent(parts[1])));
  else if(page==='aula'&&parts[1]&&parts[2]){const slug=decodeURIComponent(parts[1]),data=await loadCourse(slug);main.innerHTML=lessonView(data,parts[2]);const form=$('#lessonForm');if(form)form.onsubmit=async e=>{e.preventDefault();const btn=form.querySelector('button');btn.disabled=true;try{const response=await api('lesson',{aula_id:Number(parts[2]),resposta:new FormData(form).get('resposta')});delete state.detalhes[slug];await refresh();note(response.certificado_emitido?'Parabéns! Curso concluído e certificado emitido.':'Resposta correta! Aula concluída.');setTimeout(()=>{location.hash=response.certificado_emitido?'#/certificados':'#/curso/'+slug;render();},900);}catch(err){note(err.message,true)}finally{btn.disabled=false}};}
+ else if(page==='admin'){if(state.usuario?.id!=='sc-local-admin')throw Error('Área disponível apenas para o perfil admin local.');main.innerHTML=adminPage(await api('admin_overview'));bindAdmin();}
  else if(page==='progresso')main.innerHTML=progressView();
  else if(page==='talentos'){const dados=await api('talento');main.innerHTML=talentPage(dados);bindTalent();}
  else if(page==='certificados')main.innerHTML=certs();
@@ -118,7 +147,7 @@ async function render(){nav();const parts=(location.hash||'#/').slice(2).split('
  else if(page==='certificado'&&parts[1]){const rec=state.certificados.find(r=>r.codigo===decodeURIComponent(parts[1]));main.innerHTML=rec?certificateView(rec):'<h1>Certificado não encontrado</h1><a href="#/certificados">Voltar</a>';if(rec)$('#print').onclick=()=>window.print();}
  else if(page==='conta')main.innerHTML=header('Meu perfil','Meu perfil','Dados associados ao seu aprendizado.')+'<div class="card"><p><strong>Nome:</strong> '+escapeHTML(state.usuario.nome)+'</p><p><strong>E-mail:</strong> '+escapeHTML(state.usuario.email)+'</p><p><strong>Certificados:</strong> '+state.certificados.length+'</p><p class="muted">Os dados deste perfil ficam salvos neste navegador e não são sincronizados.</p></div>';
  else main.innerHTML=home();
- document.title=(page==='talentos'?'Banco de Talentos':page==='certificados'?'Meus certificados':page==='conta'?'Meu perfil':'Se Conecte')+' | Se Conecte';
+ document.title=(page==='admin'?'Painel administrativo':page==='talentos'?'Banco de Talentos':page==='certificados'?'Meus certificados':page==='conta'?'Meu perfil':'Se Conecte')+' | Se Conecte';
  }catch(e){main.innerHTML='<div class="card"><h1>Não foi possível carregar</h1><p>'+escapeHTML(e.message)+'</p><button class="btn" id="retry">Tentar novamente</button></div>';$('#retry').onclick=()=>render();}}
 window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});refresh().then(render).catch(e=>{$('#content').innerHTML='<div class="card"><h1>Configuração necessária</h1><p>Não foi possível iniciar seus perfis. Atualize a página com Ctrl+F5; se continuar, permita armazenamento de dados do site.</p><p class="muted">'+escapeHTML(e.message)+'</p><p><a class="btn primary" href="../">Voltar ao início</a></p></div>'});
 </script><script src="accessibility.js"></script></body></html>
