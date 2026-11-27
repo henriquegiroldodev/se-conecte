@@ -44,6 +44,16 @@ function scSave(db){try{localStorage.setItem(SC_STORE_KEY,JSON.stringify(db));}c
 function scId(){return globalThis.crypto?.randomUUID?.()||'SC-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);}
 function scCurrent(db){return db.perfis.find(p=>p.id===db.ativo)||null;}
 function scRequire(p){if(!p)throw Error('Acesse seu perfil para continuar.');return p;}
+const SC_DEFAULT_JOBS=[
+ {id:'base-1',titulo:'Auxiliar Administrativo',empresa:'Empresa Horizonte (fictícia)',local:'Marília · SP',tipo:'Presencial',descricao:'Organização de documentos, planilhas básicas e apoio às rotinas de escritório.',requisitos:'Noções de computador e comunicação.',origem:'exemplo'},
+ {id:'base-2',titulo:'Atendente de Suporte Digital',empresa:'Conecta Serviços (fictícia)',local:'Remoto',tipo:'Remoto',descricao:'Orientação inicial sobre aplicativos e registro de solicitações de atendimento.',requisitos:'Conhecimentos de internet e atendimento.',origem:'exemplo'},
+ {id:'base-3',titulo:'Assistente de Cadastro',empresa:'Nova Jornada (fictícia)',local:'Marília · SP',tipo:'Híbrido',descricao:'Atualização de registros e conferência de informações em sistemas administrativos.',requisitos:'Atenção aos detalhes e noções de informática.',origem:'exemplo'},
+ {id:'base-4',titulo:'Auxiliar de Loja',empresa:'Comércio Integra (fictícia)',local:'Marília · SP',tipo:'Presencial',descricao:'Apoio ao atendimento, consulta de produtos e organização de pedidos.',requisitos:'Comunicação e disposição para aprender.',origem:'exemplo'}
+];
+function scJobs(db){
+ const ocultas=new Set(Array.isArray(db.hiddenJobs)?db.hiddenJobs:[]);
+ return [...SC_DEFAULT_JOBS.filter(v=>!ocultas.has(v.id)),...(Array.isArray(db.customJobs)?db.customJobs:[])];
+}
 function scCatalog(db){
  const courses=[...SC_DEMO_COURSES,...(Array.isArray(db.customCourses)?db.customCourses:[])];
  const lessons=[...SC_DEMO_LESSONS.map(l=>({...l,video_url:Object.hasOwn(db.videoOverrides||{},String(l.id))?db.videoOverrides[l.id]:l.video_url})),...(Array.isArray(db.customLessons)?db.customLessons:[])];
@@ -122,7 +132,8 @@ async function scDemoApi(action,data,params=''){
     alunos:alunos.map(p=>({id:p.id,nome:p.nome,email:p.email,aulas:(p.concluidas||[]).length,certificados:(p.certificados||[]).length,tem_talento:!!p.talento})),
     indicadores:{alunos:alunos.length,aulas_concluidas:alunos.reduce((n,p)=>n+(p.concluidas||[]).length,0),certificados:alunos.reduce((n,p)=>n+(p.certificados||[]).length,0),talentos:alunos.filter(p=>!!p.talento).length},
     cursos:cat.courses.map(c=>({id:c.id,slug:c.slug,titulo:c.titulo,duracao_minutos:c.duracao_minutos,aulas:cat.lessons.filter(a=>a.curso_id===c.id).length})),
-    videoaulas:cat.lessons.map(a=>({id:a.id,curso_id:a.curso_id,curso:cat.courses.find(c=>c.id===a.curso_id)?.titulo||'',titulo:a.titulo,video_url:a.video_url||''}))
+    videoaulas:cat.lessons.map(a=>({id:a.id,curso_id:a.curso_id,curso:cat.courses.find(c=>c.id===a.curso_id)?.titulo||'',titulo:a.titulo,video_url:a.video_url||''})),
+    vagas:scJobs(db)
    };
   }
   if(action==='admin_update_video'){
@@ -154,6 +165,31 @@ async function scDemoApi(action,data,params=''){
     resposta_correta:'B',video_url:video});
    scSave(db);return {ok:true,curso_id:id};
   }
+  if(action==='admin_add_job'){
+   const titulo=String(data?.titulo||'').trim().replace(/\s+/g,' ');
+   const empresa=String(data?.empresa||'').trim().replace(/\s+/g,' ');
+   const local=String(data?.local||'').trim().replace(/\s+/g,' ');
+   const tipo=String(data?.tipo||'').trim();
+   const descricao=String(data?.descricao||'').trim();
+   const requisitos=String(data?.requisitos||'').trim();
+   if(titulo.length<4||titulo.length>120||empresa.length<2||empresa.length>120||local.length<2||local.length>120||!['Presencial','Remoto','Híbrido'].includes(tipo)||descricao.length<12||descricao.length>800||requisitos.length<5||requisitos.length>500)throw Error('Preencha todos os campos da vaga com informações válidas.');
+   if(!Array.isArray(db.customJobs))db.customJobs=[];
+   if(db.customJobs.length>=100)throw Error('Limite de 100 vagas locais atingido.');
+   const id=scId();
+   db.customJobs.push({id,titulo,empresa,local,tipo,descricao,requisitos,origem:'local'});
+   scSave(db);return {ok:true,id};
+  }
+  if(action==='admin_delete_job'){
+   const id=String(data?.id||'');
+   if(!scJobs(db).some(v=>v.id===id))throw Error('Vaga não encontrada neste navegador.');
+   if(SC_DEFAULT_JOBS.some(v=>v.id===id)){
+    if(!Array.isArray(db.hiddenJobs))db.hiddenJobs=[];
+    if(!db.hiddenJobs.includes(id))db.hiddenJobs.push(id);
+   }else{
+    db.customJobs=(db.customJobs||[]).filter(v=>v.id!==id);
+   }
+   scSave(db);return {ok:true};
+  }
   if(action==='admin_reset_progress'){
    const alvo=alunos.find(p=>p.id===data?.id);
    if(!alvo)throw Error('Aluno não encontrado neste navegador.');
@@ -172,7 +208,7 @@ async function scDemoApi(action,data,params=''){
   if(!curso)throw Error('Curso não encontrado.');
   return {curso,aulas:cat.lessons.filter(a=>a.curso_id===curso.id).map(({resposta_correta,...a})=>({...a,concluida:(p.concluidas||[]).includes(a.id)?1:0}))};
  }
- if(action==='talento')return {perfil:p.talento||null};
+ if(action==='talento')return {perfil:p.talento||null,vagas:scJobs(db)};
  if(action==='talento_salvar'){
   const cidade=String(data?.cidade||'').trim(),objetivo=String(data?.objetivo||'').trim(),habilidades=String(data?.habilidades||'').trim();
   const disponibilidade=String(data?.disponibilidade||'qualquer');
