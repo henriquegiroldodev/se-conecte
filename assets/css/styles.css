@@ -49,3 +49,11 @@
 @media(min-width:980px){.user .user-initials{display:none}.categories{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:1280px){.categories{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:639px){.section-head{align-items:start;flex-wrap:wrap}.passport-head{flex-wrap:wrap}.skill-row{gap:12px}.lesson-actions{flex-wrap:wrap}}
+
+/* Marca Se Conecte: tamanhos fluidos para desktop, celular e impressão */
+.sc-brand-login{display:block;width:min(100%,300px);height:auto;object-fit:contain;object-position:left center}
+.sc-brand-sidebar{display:block;width:205px;max-width:100%;height:auto;object-fit:contain;object-position:left center}
+.sc-brand-mobile{width:130px;height:auto;max-height:44px;object-fit:contain}
+.certificate-brand{display:block;width:230px;max-width:65%;height:auto;margin:0 auto 16px;object-fit:contain}
+@media(max-width:640px){.sc-brand-login{width:min(100%,240px)}.sc-brand-sidebar{width:180px}.certificate-brand{width:175px}}
+@media print{.certificate-brand{display:block!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
