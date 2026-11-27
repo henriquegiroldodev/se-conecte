@@ -75,13 +75,9 @@ function talentPage(data){
  const p=data.perfil||{};
  const availability=p.disponibilidade||'qualquer';
  const modes=[['qualquer','Qualquer modalidade'],['presencial','Presencial'],['remoto','Remoto'],['hibrido','Híbrido']];
- const vagas=[
-  {titulo:'Auxiliar Administrativo',empresa:'Empresa Horizonte (fictícia)',local:'Marília · SP',tipo:'Presencial',descricao:'Organização de documentos, planilhas básicas e apoio às rotinas de escritório.',requisitos:'Noções de computador e comunicação.'},
-  {titulo:'Atendente de Suporte Digital',empresa:'Conecta Serviços (fictícia)',local:'Remoto',tipo:'Remoto',descricao:'Orientação inicial sobre aplicativos e registro de solicitações de atendimento.',requisitos:'Conhecimentos de internet e atendimento.'},
-  {titulo:'Assistente de Cadastro',empresa:'Nova Jornada (fictícia)',local:'Marília · SP',tipo:'Híbrido',descricao:'Atualização de registros e conferência de informações em sistemas administrativos.',requisitos:'Atenção aos detalhes e noções de informática.'},
-  {titulo:'Auxiliar de Loja',empresa:'Comércio Integra (fictícia)',local:'Marília · SP',tipo:'Presencial',descricao:'Apoio ao atendimento, consulta de produtos e organização de pedidos.',requisitos:'Comunicação e disposição para aprender.'}
- ];
- const jobs='<section aria-labelledby="jobsTitle" class="jobs-section"><div class="eyebrow">OPORTUNIDADES</div><h2 id="jobsTitle" class="sc-section-title">Vagas e oportunidades</h2><p class="muted">Vagas fictícias para exemplificar oportunidades profissionais. Não há empresas contratando por esta página nem envio de candidaturas.</p><div class="job-grid">'+vagas.map(v=>'<article class="card job-card"><div class="tag">'+escapeHTML(v.tipo)+'</div><h3>'+escapeHTML(v.titulo)+'</h3><p class="job-company">'+escapeHTML(v.empresa)+'</p><p class="muted">'+escapeHTML(v.local)+'</p><p>'+escapeHTML(v.descricao)+'</p><p class="job-requirements"><strong>Perfil:</strong> '+escapeHTML(v.requisitos)+'</p><span class="job-notice">Vaga fictícia · apenas referência</span></article>').join('')+'</div></section>';
+ const vagas=Array.isArray(data.vagas)?data.vagas:[];
+ const cards=vagas.length?vagas.map(v=>'<article class="card job-card"><div class="tag">'+escapeHTML(v.tipo)+'</div><h3>'+escapeHTML(v.titulo)+'</h3><p class="job-company">'+escapeHTML(v.empresa)+'</p><p class="muted">'+escapeHTML(v.local)+'</p><p>'+escapeHTML(v.descricao)+'</p><p class="job-requirements"><strong>Perfil:</strong> '+escapeHTML(v.requisitos)+'</p><span class="job-notice">'+(v.origem==='exemplo'?'Vaga fictícia · apenas referência':'Cadastro local · anúncio não verificado')+'</span></article>').join(''):'<div class="card"><p class="muted">Nenhuma vaga cadastrada neste navegador.</p></div>';
+ const jobs='<section aria-labelledby="jobsTitle" class="jobs-section"><div class="eyebrow">OPORTUNIDADES</div><h2 id="jobsTitle" class="sc-section-title">Vagas e oportunidades</h2><p class="muted">Oportunidades cadastradas neste navegador para apresentação da plataforma. As vagas de exemplo são fictícias, novos anúncios não são verificados e não há envio de candidaturas por esta página.</p><div class="job-grid">'+cards+'</div></section>';
  return header('BANCO DE TALENTOS','Conecte seu aprendizado a oportunidades','Conheça oportunidades e organize seu perfil profissional. Os dados ficam salvos apenas neste navegador.')
  +'<div class="talent-grid"><section class="card"><div class="tag">PERFIL PROFISSIONAL</div><h2>Meu perfil de talentos</h2><p class="muted">Aluno: '+escapeHTML(state.usuario.nome)+'</p><form id="talentForm"><label class="field">Cidade<input name="cidade" maxlength="120" value="'+escapeHTML(p.cidade||'')+'" placeholder="Ex.: Marília - SP"></label><label class="field">Objetivo profissional<input name="objetivo" maxlength="180" value="'+escapeHTML(p.objetivo||'')+'" placeholder="Ex.: primeiro emprego na área administrativa"></label><label class="field">Habilidades e interesses<textarea name="habilidades" rows="4" maxlength="1500" placeholder="Conte o que aprendeu e suas competências">'+escapeHTML(p.habilidades||'')+'</textarea></label><label class="field">Modalidade de trabalho<select name="disponibilidade">'+modes.map(([key,label])=>'<option value="'+key+'" '+(key===availability?'selected':'')+'>'+label+'</option>').join('')+'</select></label><button class="btn primary" type="submit">Salvar perfil</button><div id="message" role="status" aria-live="polite"></div></form></section><aside class="card"><div class="tag">COMPETÊNCIAS CONCLUÍDAS</div><h2>Minhas formações</h2>'+(state.certificados.length?state.certificados.map(r=>'<p><strong>'+escapeHTML(r.titulo_emitido)+'</strong><br><small>Certificado disponível</small></p>').join(''):'<p class="muted">Conclua um curso para adicionar sua primeira formação.</p>')+'<p><a class="btn" href="#/certificados">Meus certificados</a></p></aside></div>'+jobs;
 }
@@ -108,10 +104,11 @@ function certs(){return header('Sua formação','Meus certificados','Os certific
 function adminPage(data){
  const videos=data.videoaulas.map(a=>'<form class="admin-video-row" data-admin-video-form><div><strong>'+escapeHTML(a.titulo)+'</strong><small>'+escapeHTML(a.curso)+'</small></div><input type="hidden" name="aula_id" value="'+a.id+'"><label class="field">Link da videoaula<input type="url" name="video_url" value="'+escapeHTML(a.video_url)+'" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"></label><button type="submit" class="btn primary">Salvar vídeo</button></form>').join('');
  const students=data.alunos.map(p=>'<tr><td><strong>'+escapeHTML(p.nome)+'</strong><small>'+escapeHTML(p.email)+'</small></td><td>'+p.aulas+'</td><td>'+p.certificados+'</td><td>'+(p.tem_talento?'Sim':'Não')+'</td></tr>').join('');
+ const vagas=(data.vagas||[]).map(v=>'<article class="admin-job-item"><div><strong>'+escapeHTML(v.titulo)+'</strong><small>'+escapeHTML(v.empresa)+' · '+escapeHTML(v.local)+' · '+escapeHTML(v.tipo)+'</small><p class="muted">'+escapeHTML(v.descricao)+'</p></div><button type="button" class="btn admin-danger" data-admin-delete-job="'+escapeHTML(v.id)+'">Excluir vaga</button></article>').join('');
  const courses=data.cursos.map(c=>'<li><strong>'+escapeHTML(c.titulo)+'</strong><span>'+c.aulas+' aula(s) · '+c.duracao_minutos+' minutos</span></li>').join('');
  return header('Área administrativa','Gerenciamento da plataforma','Consulte os cadastros e organize os cursos e videoaulas disponíveis neste navegador.')
  +'<div class="notice admin-warning"><strong>Administração local.</strong> Os dados e as alterações feitos aqui ficam apenas neste navegador. Para gerenciar todos os alunos pela internet será necessário um servidor e um banco de dados.</div>'
- +'<nav class="admin-quicknav" aria-label="Seções do painel"><button type="button" data-admin-scroll="admin-cadastros" class="btn">Cadastros</button><button type="button" data-admin-scroll="admin-videos" class="btn">Videoaulas</button><button type="button" data-admin-scroll="admin-cursos" class="btn">Cursos</button></nav>'
+ +'<nav class="admin-quicknav" aria-label="Seções do painel"><button type="button" data-admin-scroll="admin-cadastros" class="btn">Cadastros</button><button type="button" data-admin-scroll="admin-videos" class="btn">Videoaulas</button><button type="button" data-admin-scroll="admin-cursos" class="btn">Cursos</button><button type="button" data-admin-scroll="admin-vagas" class="btn">Vagas</button></nav>'
  +'<section id="admin-cadastros" class="card admin-section"><div class="admin-section-heading"><div><span class="tag">CADASTROS</span><h2>Alunos cadastrados</h2></div><strong>'+data.alunos.length+' neste navegador</strong></div><p class="muted">Consulte os perfis de alunos criados neste dispositivo. O administrador não visualiza senhas.</p>'
  +(students?'<div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Aluno</th><th>Aulas concluídas</th><th>Certificados</th><th>Banco de Talentos</th></tr></thead><tbody>'+students+'</tbody></table></div>':'<div class="empty"><p>Ainda não existem alunos cadastrados neste navegador.</p></div>')+'</section>'
  +'<section id="admin-videos" class="card admin-section"><div class="admin-section-heading"><div><span class="tag">VIDEOAULAS</span><h2>Gerenciar vídeos</h2></div><span class="muted">'+data.videoaulas.length+' aula(s)</span></div><p class="muted">Cole um link do YouTube em cada aula e clique em Salvar vídeo. Deixe o campo vazio para retirar o vídeo.</p><div class="admin-video-list">'+videos+'</div></section>'
@@ -121,7 +118,14 @@ function adminPage(data){
  +'<div class="admin-course-fields"><label class="field">Duração estimada (minutos)<input name="duracao_minutos" type="number" required min="5" max="1200" value="45"></label><label class="field">Nome da primeira aula<input name="aula_titulo" required minlength="3" maxlength="120" value="Introdução ao curso"></label></div>'
  +'<label class="field">Link da primeira videoaula (opcional)<input name="video_url" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"></label>'
  +'<button class="btn primary" type="submit">Adicionar curso</button></form>'
- +'<h3 class="admin-catalog-heading">Cursos cadastrados</h3><ul class="admin-courses">'+courses+'</ul></section>';
+ +'<h3 class="admin-catalog-heading">Cursos cadastrados</h3><ul class="admin-courses">'+courses+'</ul></section>'
+ +'<section id="admin-vagas" class="card admin-section"><span class="tag">BANCO DE TALENTOS</span><h2>Gerenciar vagas</h2><p class="muted">Cadastre ou exclua vagas do Banco de Talentos deste navegador.</p>'
+ +'<form id="adminJobForm" class="admin-course-form"><div class="admin-course-fields"><label class="field">Título da vaga<input name="titulo" required minlength="4" maxlength="120" placeholder="Ex.: Auxiliar de Escritório"></label><label class="field">Empresa<input name="empresa" required minlength="2" maxlength="120" placeholder="Nome da empresa"></label></div>'
+ +'<div class="admin-course-fields"><label class="field">Cidade ou local de trabalho<input name="local" required minlength="2" maxlength="120" placeholder="Ex.: Marília · SP ou Remoto"></label><label class="field">Modalidade<select name="tipo" required><option value="Presencial">Presencial</option><option value="Remoto">Remoto</option><option value="Híbrido">Híbrido</option></select></label></div>'
+ +'<label class="field">Descrição da vaga<textarea name="descricao" rows="3" required minlength="12" maxlength="800" placeholder="Descreva as atividades"></textarea></label>'
+ +'<label class="field">Requisitos<textarea name="requisitos" rows="2" required minlength="5" maxlength="500" placeholder="Conhecimentos e habilidades"></textarea></label>'
+ +'<button type="submit" class="btn primary">Cadastrar vaga</button></form>'
+ +'<h3 class="admin-catalog-heading">Vagas cadastradas ('+(data.vagas||[]).length+')</h3><div class="admin-job-list">'+(vagas||'<p class="muted">Não há vagas cadastradas.</p>')+'</div></section>';
 }
 function bindAdmin(){
  const page=$('#content');
@@ -134,6 +138,20 @@ function bindAdmin(){
    await refresh();await render();
    alert('Vídeo atualizado neste navegador.');
   }catch(err){alert(err.message);btn.disabled=false}
+ }));
+ const jobForm=page.querySelector('#adminJobForm');
+ if(jobForm)jobForm.addEventListener('submit',async e=>{
+  e.preventDefault();const btn=jobForm.querySelector('[type="submit"]');btn.disabled=true;
+  try{
+   await api('admin_add_job',Object.fromEntries(new FormData(jobForm)));
+   await render();alert('Vaga cadastrada neste navegador.');
+  }catch(err){alert(err.message);btn.disabled=false}
+ });
+ page.querySelectorAll('[data-admin-delete-job]').forEach(button=>button.addEventListener('click',async()=>{
+  if(!confirm('Excluir esta vaga do Banco de Talentos neste navegador?'))return;
+  button.disabled=true;
+  try{await api('admin_delete_job',{id:button.dataset.adminDeleteJob});await render();}
+  catch(err){alert(err.message);button.disabled=false}
  }));
  const form=page.querySelector('#adminCourseForm');
  if(form)form.addEventListener('submit',async e=>{
