@@ -15,12 +15,16 @@ Esta versão foi criada para apresentações sem PHP, MySQL, PostgreSQL ou funç
 
 - Dois cursos com quatro aulas cada e atividades avaliadas localmente
 - Player YouTube nas primeiras aulas e textos nas demais (vídeos de terceiros podem bloquear a incorporação)
-- Perfil local demonstrativo usando nome e e-mail (nenhuma senha, nenhum login real)
+- Perfis locais com nome, e-mail e senha obrigatória (verificação da senha apenas no navegador; não há autenticação de servidor)
 - Progresso de aulas, certificado demonstrativo para impressão em PDF e Banco de Talentos salvos em `localStorage`
 - Acessibilidade (tamanho do texto, alto contraste, reduzir animações, botões maiores e leitura simplificada), sem leitura em voz alta
 - Banco de Talentos com quatro vagas fictícias, claramente identificadas e sem candidaturas reais
 
-**Limitações:** os dados ficam **somente no navegador e dispositivo usado**, podem ser apagados pelo usuário e não são sincronizados com servidores. Não há validação de identidade; o campo e-mail serve apenas para reabrir o perfil local. Certificados são demonstrativos e não têm validação pública. Não informe dados pessoais verdadeiros. Para produção, é necessário backend real, autenticação e armazenamento seguro.
+**Limitações:** os dados ficam **somente no navegador e dispositivo usado**, podem ser apagados pelo usuário e não são sincronizados com servidores. Não há validação de identidade nem autenticação online; o mesmo e-mail cadastrado em outro dispositivo não dá acesso ao perfil. A senha é guardada como hash PBKDF2 com salt, não como texto simples. Perfis antigos sem senha serão atualizados para a primeira senha utilizada no próximo acesso no mesmo navegador. Certificados são demonstrativos e não têm validação pública. Não informe dados pessoais verdadeiros. Para produção, é necessário backend real, autenticação e armazenamento seguro.
+
+## Cadastro e senha
+
+O cadastro exige nome, e-mail e uma senha de 10 a 128 caracteres. O login exige e-mail e senha. A senha só protege o perfil neste navegador e não é enviada nem recuperada por e-mail; limpar os dados do navegador também remove os perfis. Utilize HTTPS (o Netlify já fornece HTTPS) para acesso à Web Crypto API. Para segurança real de contas é necessário implementar um backend de autenticação.
 
 ## Rodar localmente
 
