@@ -178,3 +178,25 @@ input,textarea,select{max-width:100%}
  html,body{overflow:visible!important}
  .cert{max-width:100%;page-break-inside:avoid}
 }
+
+/* Painel administrativo local */
+.admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin:22px 0}
+.admin-stat{display:flex;flex-direction:column;gap:12px;min-width:0}
+.admin-stat>strong{font-size:29px;color:#0b57d0;line-height:1.1}
+.admin-section{margin:20px 0}
+.admin-section-heading{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.admin-section-heading h2{margin:5px 0 12px}
+.admin-warning{line-height:1.65}
+.admin-table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:18px}
+.admin-table{border-collapse:collapse;width:100%;min-width:660px;text-align:left}
+.admin-table th,.admin-table td{padding:14px 12px;border-bottom:1px solid #e7eaf0;text-align:left;vertical-align:middle;font-size:14px}
+.admin-table th{color:#556378;font-size:12px;font-weight:700;background:#f7f9fd}
+.admin-table td small{display:block;color:#667085;margin-top:5px;font-size:12px;overflow-wrap:anywhere}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-actions .btn{font-size:12px;min-height:40px;padding:9px 11px}
+.admin-actions .admin-danger{color:#a52424;background:#fff;border-color:#e8b7b7}
+.admin-courses{padding:0;list-style:none;margin:16px 0}
+.admin-courses li{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f4}
+.admin-courses li span{font-size:13px;color:#667085}
+@media(max-width:850px){.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.admin-stats{gap:10px}.admin-stat{padding:15px}.admin-stat>strong{font-size:25px}.admin-section{padding:16px!important}.admin-section-heading{gap:5px}.admin-table{min-width:620px}}
