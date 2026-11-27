@@ -14,6 +14,28 @@ const SC_DEMO_LESSONS=[
  [8,2,'Navegação segura e proteção de contas','Use senhas longas e diferentes, ative a autenticação em duas etapas e faça backups. Desconfie de sites falsos. O cadeado HTTPS protege a conexão, mas não garante que o site seja legítimo.','Qual hábito ajuda a proteger suas contas?','Reutilizar a mesma senha','Compartilhar códigos recebidos por SMS','Ativar autenticação em duas etapas','C','']
 ].map(([id,curso_id,titulo,conteudo,atividade_pergunta,opcao_a,opcao_b,opcao_c,resposta_correta,video_url],i)=>({id,curso_id,titulo,conteudo,atividade_pergunta,opcao_a,opcao_b,opcao_c,resposta_correta,video_url,ordem:((i%4)+1)}));
 const SC_STORE_KEY='seconecte_demo_v1';
+// A verificação da senha ocorre no navegador. Isto não oferece autenticação de servidor.
+const SC_PASSWORD_ITERATIONS=180000;
+function scB64(bytes){return btoa(String.fromCharCode(...bytes));}
+function scFromB64(value){return Uint8Array.from(atob(value),ch=>ch.charCodeAt(0));}
+async function scPasswordHash(password,salt,iterations=SC_PASSWORD_ITERATIONS){
+ if(!globalThis.crypto?.subtle)throw Error('Seu navegador não suporta a proteção de senha local. Utilize uma conexão HTTPS atualizada.');
+ const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+ const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:scFromB64(salt),iterations,hash:'SHA-256'},key,256);
+ return scB64(new Uint8Array(bits));
+}
+async function scSetPassword(profile,password){
+ if(typeof password!=='string'||password.length<10||password.length>128)throw Error('Crie uma senha entre 10 e 128 caracteres.');
+ const salt=new Uint8Array(16);crypto.getRandomValues(salt);
+ profile.passwordSalt=scB64(salt);profile.passwordIterations=SC_PASSWORD_ITERATIONS;
+ profile.passwordHash=await scPasswordHash(password,profile.passwordSalt,profile.passwordIterations);
+}
+async function scCheckPassword(profile,password){
+ const expected=scFromB64(profile.passwordHash),actual=scFromB64(await scPasswordHash(password,profile.passwordSalt,profile.passwordIterations||SC_PASSWORD_ITERATIONS));
+ if(actual.length!==expected.length)return false;
+ let mismatch=0;for(let i=0;i<actual.length;i++)mismatch|=actual[i]^expected[i];
+ return mismatch===0;
+}
 function scLoad(){
  try {const v=JSON.parse(localStorage.getItem(SC_STORE_KEY));if(v&&typeof v==='object'&&Array.isArray(v.perfis))return v;}catch{}
  return {perfis:[],ativo:null};
@@ -31,12 +53,18 @@ async function scDemoApi(action,data,params=''){
   if(nome.length<3||nome.length>120||!/^\S+@\S+\.\S+$/.test(email)||email.length>160)throw Error('Informe nome completo e e-mail válido.');
   if(db.perfis.some(p=>p.email===email))throw Error('Este perfil já existe neste navegador. Use a opção Entrar.');
   const p={id:scId(),nome,email,concluidas:[],certificados:[],talento:null};
+  await scSetPassword(p,data?.senha);
   db.perfis.push(p);db.ativo=p.id;scSave(db);return {ok:true};
  }
  if(action==='login'){
-  const email=String(data?.email||'').trim().toLowerCase();
+  const email=String(data?.email||'').trim().toLowerCase(),senha=data?.senha;
   const p=db.perfis.find(p=>p.email===email);
-  if(!p)throw Error('Perfil não encontrado neste navegador. Crie seu perfil para continuar.');
+  if(!p||typeof senha!=='string'||!senha)throw Error('E-mail ou senha incorretos.');
+  if(!p.passwordHash){
+   // Transição dos perfis criados antes da exigência de senha, apenas no mesmo navegador.
+   // A primeira senha escolhida neste dispositivo protege o perfil somente localmente.
+   await scSetPassword(p,senha);
+  }else if(!await scCheckPassword(p,senha))throw Error('E-mail ou senha incorretos.');
   db.ativo=p.id;scSave(db);return {ok:true};
  }
  if(action==='logout'){db.ativo=null;scSave(db);return {ok:true};}
