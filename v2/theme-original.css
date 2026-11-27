@@ -219,3 +219,14 @@ input,textarea,select{max-width:100%}
 #admin-cadastros,#admin-videos,#admin-cursos{scroll-margin-top:100px}
 @media(max-width:880px){.admin-video-row{grid-template-columns:minmax(0,1fr) auto}.admin-video-row>div{grid-column:1/-1}}
 @media(max-width:600px){.admin-video-row{grid-template-columns:minmax(0,1fr)}.admin-video-row>div{grid-column:1}.admin-video-row .btn{width:100%}.admin-course-fields{grid-template-columns:minmax(0,1fr)}.admin-quicknav{gap:7px}.admin-quicknav .btn{padding:9px 11px;font-size:13px}}
+
+/* Gestão administrativa de vagas do Banco de Talentos */
+.admin-job-list{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.admin-job-item{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px;border:1px solid #e3e7ee;border-radius:12px;background:#fcfdff}
+.admin-job-item>div{min-width:0;flex:1}
+.admin-job-item strong{display:block;color:#102a56;font-size:16px}
+.admin-job-item small{display:block;color:#667085;margin-top:5px;overflow-wrap:anywhere}
+.admin-job-item p{margin:7px 0 0;font-size:13px}
+.admin-job-item .btn{flex:0 0 auto}
+#admin-vagas select{display:block;width:100%;min-height:48px;border:1px solid #c8cdd7;border-radius:9px;padding:12px;font:inherit;background:#fff;margin-top:9px}
+@media(max-width:600px){.admin-job-item{flex-direction:column;align-items:stretch}.admin-job-item .btn{width:100%}}
