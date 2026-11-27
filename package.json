@@ -1,12 +1,9 @@
 {
-  "name": "se-conecte",
+  "name": "se-conecte-static-demo",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "node scripts/build-netlify.mjs"
-  },
-  "dependencies": {
-    "pg": "^8.13.0",
-    "bcryptjs": "^3.0.2"
   }
 }
