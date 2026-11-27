@@ -111,7 +111,7 @@ function adminPage(data){
  const courses=data.cursos.map(c=>'<li><strong>'+escapeHTML(c.titulo)+'</strong><span>'+c.aulas+' aula(s) · '+c.duracao_minutos+' minutos</span></li>').join('');
  return header('Área administrativa','Gerenciamento da plataforma','Consulte os cadastros e organize os cursos e videoaulas disponíveis neste navegador.')
  +'<div class="notice admin-warning"><strong>Administração local.</strong> Os dados e as alterações feitos aqui ficam apenas neste navegador. Para gerenciar todos os alunos pela internet será necessário um servidor e um banco de dados.</div>'
- +'<nav class="admin-quicknav" aria-label="Seções do painel"><a href="#admin-cadastros" class="btn">Cadastros</a><a href="#admin-videos" class="btn">Videoaulas</a><a href="#admin-cursos" class="btn">Cursos</a></nav>'
+ +'<nav class="admin-quicknav" aria-label="Seções do painel"><button type="button" data-admin-scroll="admin-cadastros" class="btn">Cadastros</button><button type="button" data-admin-scroll="admin-videos" class="btn">Videoaulas</button><button type="button" data-admin-scroll="admin-cursos" class="btn">Cursos</button></nav>'
  +'<section id="admin-cadastros" class="card admin-section"><div class="admin-section-heading"><div><span class="tag">CADASTROS</span><h2>Alunos cadastrados</h2></div><strong>'+data.alunos.length+' neste navegador</strong></div><p class="muted">Consulte os perfis de alunos criados neste dispositivo. O administrador não visualiza senhas.</p>'
  +(students?'<div class="admin-table-scroll"><table class="admin-table"><thead><tr><th>Aluno</th><th>Aulas concluídas</th><th>Certificados</th><th>Banco de Talentos</th></tr></thead><tbody>'+students+'</tbody></table></div>':'<div class="empty"><p>Ainda não existem alunos cadastrados neste navegador.</p></div>')+'</section>'
  +'<section id="admin-videos" class="card admin-section"><div class="admin-section-heading"><div><span class="tag">VIDEOAULAS</span><h2>Gerenciar vídeos</h2></div><span class="muted">'+data.videoaulas.length+' aula(s)</span></div><p class="muted">Cole um link do YouTube em cada aula e clique em Salvar vídeo. Deixe o campo vazio para retirar o vídeo.</p><div class="admin-video-list">'+videos+'</div></section>'
@@ -125,6 +125,7 @@ function adminPage(data){
 }
 function bindAdmin(){
  const page=$('#content');
+ page.querySelectorAll('[data-admin-scroll]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.adminScroll)?.scrollIntoView({behavior:'smooth',block:'start'})));
  page.querySelectorAll('[data-admin-video-form]').forEach(form=>form.addEventListener('submit',async e=>{
   e.preventDefault();const btn=form.querySelector('button');btn.disabled=true;
   try{
