@@ -68,6 +68,17 @@ async function scDemoApi(action,data,params=''){
    }
    db.ativo=admin.id;scSave(db);return {ok:true};
   }
+  // Conta de aluno para apresentação; os dados permanecem somente neste navegador.
+  if(email==='usuario@usuario.com'){
+   if(senha!=='usuario123')throw Error('E-mail ou senha incorretos.');
+   let aluno=db.perfis.find(p=>p.email===email);
+   if(!aluno){
+    aluno={id:scId(),nome:'Usuário de Teste',email,concluidas:[],certificados:[],talento:null};
+    await scSetPassword(aluno,senha);
+    db.perfis.push(aluno);
+   }
+   db.ativo=aluno.id;scSave(db);return {ok:true};
+  }
   const p=db.perfis.find(p=>p.email===email);
   if(!p||typeof senha!=='string'||!senha)throw Error('E-mail ou senha incorretos.');
   if(!p.passwordHash){
