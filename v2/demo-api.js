@@ -44,10 +44,32 @@ function scSave(db){try{localStorage.setItem(SC_STORE_KEY,JSON.stringify(db));}c
 function scId(){return globalThis.crypto?.randomUUID?.()||'SC-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);}
 function scCurrent(db){return db.perfis.find(p=>p.id===db.ativo)||null;}
 function scRequire(p){if(!p)throw Error('Acesse seu perfil para continuar.');return p;}
-function scCourses(p){return SC_DEMO_COURSES.map(c=>({...c,total_aulas:4,aulas_concluidas:p?SC_DEMO_LESSONS.filter(a=>a.curso_id===c.id&&p.concluidas.includes(a.id)).length:0}));}
+function scCatalog(db){
+ const courses=[...SC_DEMO_COURSES,...(Array.isArray(db.customCourses)?db.customCourses:[])];
+ const lessons=[...SC_DEMO_LESSONS.map(l=>({...l,video_url:Object.hasOwn(db.videoOverrides||{},String(l.id))?db.videoOverrides[l.id]:l.video_url})),...(Array.isArray(db.customLessons)?db.customLessons:[])];
+ return {courses,lessons};
+}
+function scCourses(p,db){
+ const cat=scCatalog(db);
+ return cat.courses.map(c=>{
+  const aulas=cat.lessons.filter(a=>a.curso_id===c.id);
+  return {...c,total_aulas:aulas.length,aulas_concluidas:p?aulas.filter(a=>(p.concluidas||[]).includes(a.id)).length:0};
+ });
+}
+function scValidateVideo(value){
+ const url=String(value||'').trim();
+ if(!url)return '';
+ if(url.length>1000)throw Error('O endereço do vídeo é muito longo.');
+ let u;try{u=new URL(url);}catch{throw Error('Informe uma URL completa do YouTube iniciada por https://.');}
+ if(u.protocol!=='https:'||!['youtube.com','www.youtube.com','m.youtube.com','youtu.be','www.youtube-nocookie.com'].includes(u.hostname.toLowerCase()))throw Error('Use um endereço HTTPS do YouTube.');
+ const part=u.pathname.match(/^\/(?:embed|shorts|live)\/([a-zA-Z0-9_-]{11})(?:\/|$)/);
+ const vid=u.hostname==='youtu.be'?u.pathname.split('/')[1]:(u.searchParams.get('v')||(part&&part[1]));
+ if(!/^[a-zA-Z0-9_-]{11}$/.test(vid||''))throw Error('O link do YouTube não contém um vídeo válido.');
+ return 'https://www.youtube.com/watch?v='+vid;
+}
 async function scDemoApi(action,data,params=''){
  const db=scLoad(),user=scCurrent(db);
- if(action==='bootstrap')return {csrf:'local',usuario:user?{id:user.id,nome:user.nome,email:user.email}:null,cursos:scCourses(user),certificados:user?.certificados||[]};
+ if(action==='bootstrap')return {csrf:'local',usuario:user?{id:user.id,nome:user.nome,email:user.email}:null,cursos:scCourses(user,db),certificados:user?.certificados||[]};
  if(action==='register'){
   const nome=String(data?.nome||'').trim().replace(/\s+/g,' '),email=String(data?.email||'').trim().toLowerCase();
   if(nome.length<3||nome.length>120||!/^\S+@\S+\.\S+$/.test(email)||email.length>160)throw Error('Informe nome completo e e-mail válido.');
@@ -94,12 +116,43 @@ async function scDemoApi(action,data,params=''){
  if(action.startsWith('admin_')){
   if(user?.id!=='sc-local-admin')throw Error('Acesso restrito ao perfil de administração local.');
   const alunos=db.perfis.filter(p=>p.id!=='sc-local-admin');
+  const cat=scCatalog(db);
   if(action==='admin_overview'){
    return {
     alunos:alunos.map(p=>({id:p.id,nome:p.nome,email:p.email,aulas:(p.concluidas||[]).length,certificados:(p.certificados||[]).length,tem_talento:!!p.talento})),
     indicadores:{alunos:alunos.length,aulas_concluidas:alunos.reduce((n,p)=>n+(p.concluidas||[]).length,0),certificados:alunos.reduce((n,p)=>n+(p.certificados||[]).length,0),talentos:alunos.filter(p=>!!p.talento).length},
-    cursos:SC_DEMO_COURSES.map(c=>({id:c.id,titulo:c.titulo,duracao_minutos:c.duracao_minutos,aulas:SC_DEMO_LESSONS.filter(a=>a.curso_id===c.id).length}))
+    cursos:cat.courses.map(c=>({id:c.id,slug:c.slug,titulo:c.titulo,duracao_minutos:c.duracao_minutos,aulas:cat.lessons.filter(a=>a.curso_id===c.id).length})),
+    videoaulas:cat.lessons.map(a=>({id:a.id,curso_id:a.curso_id,curso:cat.courses.find(c=>c.id===a.curso_id)?.titulo||'',titulo:a.titulo,video_url:a.video_url||''}))
    };
+  }
+  if(action==='admin_update_video'){
+   const aula=cat.lessons.find(a=>a.id===Number(data?.aula_id));
+   if(!aula)throw Error('Aula não encontrada.');
+   const url=scValidateVideo(data?.video_url);
+   if(!db.videoOverrides)db.videoOverrides={};
+   if(aula.id<=SC_DEMO_LESSONS.length)db.videoOverrides[aula.id]=url;
+   else {const custom=(db.customLessons||[]).find(a=>a.id===aula.id);if(!custom)throw Error('Aula não encontrada.');custom.video_url=url;}
+   scSave(db);return {ok:true};
+  }
+  if(action==='admin_add_course'){
+   const titulo=String(data?.titulo||'').trim().replace(/\s+/g,' ');
+   const descricao=String(data?.descricao||'').trim();
+   const aulaTitulo=String(data?.aula_titulo||'Introdução').trim();
+   const duracao=Number(data?.duracao_minutos);
+   const video=scValidateVideo(data?.video_url);
+   if(titulo.length<5||titulo.length>120||descricao.length<12||descricao.length>500||aulaTitulo.length<3||aulaTitulo.length>120||!Number.isInteger(duracao)||duracao<5||duracao>1200)throw Error('Confira o título, a descrição, a aula inicial e a duração do curso.');
+   const id=Math.max(0,...cat.courses.map(c=>c.id))+1;
+   const aulaId=Math.max(0,...cat.lessons.map(a=>a.id))+1;
+   const slug='curso-'+id;
+   if(!db.customCourses)db.customCourses=[];
+   if(!db.customLessons)db.customLessons=[];
+   db.customCourses.push({id,slug,titulo,descricao,duracao_minutos:duracao,ordem:cat.courses.length+1});
+   db.customLessons.push({id:aulaId,curso_id:id,titulo:aulaTitulo,ordem:1,
+    conteudo:'Assista à videoaula e anote os principais pontos. Depois, responda à atividade para registrar sua conclusão.',
+    atividade_pergunta:'Qual atitude ajuda mais a aproveitar esta aula?',
+    opcao_a:'Não prestar atenção ao conteúdo',opcao_b:'Assistir, anotar e revisar os pontos principais',opcao_c:'Compartilhar senhas pessoais',
+    resposta_correta:'B',video_url:video});
+   scSave(db);return {ok:true,curso_id:id};
   }
   if(action==='admin_reset_progress'){
    const alvo=alunos.find(p=>p.id===data?.id);
@@ -115,9 +168,9 @@ async function scDemoApi(action,data,params=''){
  }
  const p=scRequire(user);
  if(action==='course'){
-  const slug=new URLSearchParams(params.replace(/^&/,'' )).get('slug'),curso=SC_DEMO_COURSES.find(c=>c.slug===slug);
+  const slug=new URLSearchParams(params.replace(/^&/,'' )).get('slug'),cat=scCatalog(db),curso=cat.courses.find(c=>c.slug===slug);
   if(!curso)throw Error('Curso não encontrado.');
-  return {curso,aulas:SC_DEMO_LESSONS.filter(a=>a.curso_id===curso.id).map(({resposta_correta,...a})=>({...a,concluida:p.concluidas.includes(a.id)?1:0}))};
+  return {curso,aulas:cat.lessons.filter(a=>a.curso_id===curso.id).map(({resposta_correta,...a})=>({...a,concluida:(p.concluidas||[]).includes(a.id)?1:0}))};
  }
  if(action==='talento')return {perfil:p.talento||null};
  if(action==='talento_salvar'){
@@ -128,13 +181,13 @@ async function scDemoApi(action,data,params=''){
   scSave(db);return {ok:true};
  }
  if(action==='lesson'){
-  const aula=SC_DEMO_LESSONS.find(l=>l.id===Number(data?.aula_id));
+  const cat=scCatalog(db),aula=cat.lessons.find(l=>l.id===Number(data?.aula_id));
   if(!aula||!['A','B','C'].includes(data?.resposta))throw Error('Resposta inválida.');
   if(aula.resposta_correta!==data.resposta)throw Error('Não foi dessa vez. Revise o conteúdo e tente novamente.');
   if(!p.concluidas.includes(aula.id))p.concluidas.push(aula.id);
-  const c=SC_DEMO_COURSES.find(c=>c.id===aula.curso_id);
-  const total=SC_DEMO_LESSONS.filter(a=>a.curso_id===c.id).length;
-  const concluidas=SC_DEMO_LESSONS.filter(a=>a.curso_id===c.id&&p.concluidas.includes(a.id)).length;
+  const c=cat.courses.find(c=>c.id===aula.curso_id);
+  const total=cat.lessons.filter(a=>a.curso_id===c.id).length;
+  const concluidas=cat.lessons.filter(a=>a.curso_id===c.id&&p.concluidas.includes(a.id)).length;
   let certificado_emitido=false;
   if(total===concluidas&&!p.certificados.some(cert=>cert.curso_id===c.id)){
    p.certificados.push({codigo:scId(),curso_id:c.id,nome_emitido:p.nome,titulo_emitido:c.titulo,total_aulas:total,emitido_em:new Date().toISOString()});
