@@ -1,19 +1,28 @@
-# Publicar no Netlify
+# Se Conecte — versão demonstrativa para Netlify
 
-A branch netlify mantém a interface v2 e substitui a API PHP por uma função Node.js. A main continua disponível para XAMPP.
+Esta versão foi criada para apresentações sem PHP, MySQL, PostgreSQL ou funções de servidor. **Não é um sistema de autenticação real.**
 
-1. Crie um banco PostgreSQL (por exemplo, Neon, https://neon.tech/). Confira os limites do plano gratuito.
-2. No editor SQL do banco novo, execute database/netlify.sql. O script cria as tabelas e os dois cursos com oito aulas. Não importa contas do MySQL antigo.
-3. No Netlify, escolha Add new project / Import an existing project / GitHub. Autorize o acesso ao repositório privado se necessário. Escolha henriquegiroldodev/se-conecte e a branch netlify.
-4. Build command: npm run build. Publish directory: dist. A configuração netlify.toml já define ambos.
-5. Em Environment variables, configure DATABASE_URL com a string de conexão PostgreSQL (incluindo SSL exigido pelo provedor) e SESSION_SECRET com uma chave aleatória de pelo menos 32 caracteres. Gere uma chave com node -e "console.log(require('crypto').randomBytes(32).toString('hex'))". Não publique as credenciais no GitHub.
-6. Faça o deploy ou redeploy após salvar as variáveis.
-7. Abra o endereço HTTPS fornecido pelo Netlify. Cadastre uma conta de teste, abra os dois cursos, teste os vídeos, responda às atividades e confirme o progresso, certificados e Banco de Talentos após sair e entrar.
+## Publicação pelo GitHub
 
-O build publica somente a interface e os logos; SQL, PHP e documentação não são servidos publicamente. A API usa consultas parametrizadas, bcrypt, cookie assinado HttpOnly/Secure e token CSRF. Ainda é necessário testar a integração real, implementar limitação de tentativas, revogação de sessões e revisar LGPD antes de receber alunos reais. Os dois links de vídeo existentes são referências não verificadas; as demais aulas aguardam vídeos. O banco novo começa sem alunos. Não execute scripts de reset.
+1. No Netlify, escolha **Add new project → Import an existing project → GitHub**.
+2. Selecione `henriquegiroldodev/se-conecte` (repositório privado exige autorização).
+3. Escolha a branch **main** (ou **netlify**, ambas com a versão demonstrativa após a integração).
+4. Deixe **Base directory** vazio, configure **Build command** como `node scripts/build-netlify.mjs` e **Publish directory** como `dist`.
+5. Publique. O site abrirá em `https://SEU-SITE.netlify.app/`, redirecionando para `/v2/`.
+6. Caso haja 404, confira em **Deploys** se o deploy está na branch correta e em **Deploy file browser** se os arquivos `index.html` e `v2/index.html` foram publicados.
 
-Para alterar um vídeo, use o editor SQL do PostgreSQL:
-```sql
-UPDATE sc_aulas SET video_url='https://www.youtube.com/watch?v=SEU_ID'
-WHERE curso_id=(SELECT id FROM sc_cursos WHERE slug='primeiros-passos') AND ordem=1;
-```
+## Funcionalidades sem banco
+
+- Dois cursos com quatro aulas cada e atividades avaliadas localmente
+- Player YouTube nas primeiras aulas e textos nas demais (vídeos de terceiros podem bloquear a incorporação)
+- Perfil local demonstrativo usando nome e e-mail (nenhuma senha, nenhum login real)
+- Progresso de aulas, certificado demonstrativo para impressão em PDF e Banco de Talentos salvos em `localStorage`
+- Acessibilidade e layout original
+
+**Limitações:** os dados ficam **somente no navegador e dispositivo usado**, podem ser apagados pelo usuário e não são sincronizados com servidores. Não há validação de identidade; o campo e-mail serve apenas para reabrir o perfil local. Certificados são demonstrativos e não têm validação pública. Não informe dados pessoais verdadeiros. Para produção, é necessário backend real, autenticação e armazenamento seguro.
+
+## Rodar localmente
+
+No diretório do projeto, execute `node scripts/build-netlify.mjs` e sirva a pasta `dist` por um servidor HTTP estático. Por exemplo: `npx serve dist`.
+
+A versão antiga PHP/MySQL foi preservada na branch `php-mysql`. O diretório `dist` contém apenas recursos estáticos. Os arquivos PHP, SQL e as credenciais não entram na publicação Netlify.
