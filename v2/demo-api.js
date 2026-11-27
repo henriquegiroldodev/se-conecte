@@ -58,6 +58,16 @@ async function scDemoApi(action,data,params=''){
  }
  if(action==='login'){
   const email=String(data?.email||'').trim().toLowerCase(),senha=data?.senha;
+  // Perfil local de apresentação: não concede permissões de administrador.
+  if(email==='admin'){
+   if(senha!=='admin')throw Error('E-mail ou senha incorretos.');
+   let admin=db.perfis.find(p=>p.id==='sc-local-admin');
+   if(!admin){
+    admin={id:'sc-local-admin',nome:'Administrador',email:'admin',concluidas:[],certificados:[],talento:null};
+    db.perfis.push(admin);
+   }
+   db.ativo=admin.id;scSave(db);return {ok:true};
+  }
   const p=db.perfis.find(p=>p.email===email);
   if(!p||typeof senha!=='string'||!senha)throw Error('E-mail ou senha incorretos.');
   if(!p.passwordHash){
