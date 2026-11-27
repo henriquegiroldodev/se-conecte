@@ -1,4 +1,4 @@
-// Demonstração local: nenhum dado é enviado a servidores.
+// Armazenamento local do projeto estático: não há servidor ou autenticação.
 const SC_DEMO_COURSES=[
  {id:1,slug:'primeiros-passos',titulo:'Uso Básico do Computador',descricao:'Aprenda a utilizar o computador: componentes, mouse, teclado, arquivos, pastas e primeiros passos na internet.',duracao_minutos:90,ordem:1},
  {id:2,slug:'seguranca-digital',titulo:'Segurança na Internet e no Celular',descricao:'Aprenda a navegar com segurança, reconhecer golpes digitais e proteger informações no celular e computador.',duracao_minutos:80,ordem:2}
@@ -21,7 +21,7 @@ function scLoad(){
 function scSave(db){try{localStorage.setItem(SC_STORE_KEY,JSON.stringify(db));}catch{throw Error('Seu navegador bloqueou o armazenamento local. Permita dados do site para salvar o progresso.');}}
 function scId(){return globalThis.crypto?.randomUUID?.()||'SC-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);}
 function scCurrent(db){return db.perfis.find(p=>p.id===db.ativo)||null;}
-function scRequire(p){if(!p)throw Error('Entre na sua demonstração para continuar.');return p;}
+function scRequire(p){if(!p)throw Error('Acesse seu perfil para continuar.');return p;}
 function scCourses(p){return SC_DEMO_COURSES.map(c=>({...c,total_aulas:4,aulas_concluidas:p?SC_DEMO_LESSONS.filter(a=>a.curso_id===c.id&&p.concluidas.includes(a.id)).length:0}));}
 async function scDemoApi(action,data,params=''){
  const db=scLoad(),user=scCurrent(db);
@@ -29,14 +29,14 @@ async function scDemoApi(action,data,params=''){
  if(action==='register'){
   const nome=String(data?.nome||'').trim().replace(/\s+/g,' '),email=String(data?.email||'').trim().toLowerCase();
   if(nome.length<3||nome.length>120||!/^\S+@\S+\.\S+$/.test(email)||email.length>160)throw Error('Informe nome completo e e-mail válido.');
-  if(db.perfis.some(p=>p.email===email))throw Error('Este perfil de demonstração já existe neste navegador. Use a opção Entrar.');
+  if(db.perfis.some(p=>p.email===email))throw Error('Este perfil já existe neste navegador. Use a opção Entrar.');
   const p={id:scId(),nome,email,concluidas:[],certificados:[],talento:null};
   db.perfis.push(p);db.ativo=p.id;scSave(db);return {ok:true};
  }
  if(action==='login'){
   const email=String(data?.email||'').trim().toLowerCase();
   const p=db.perfis.find(p=>p.email===email);
-  if(!p)throw Error('Perfil não encontrado neste navegador. Crie um novo perfil de demonstração.');
+  if(!p)throw Error('Perfil não encontrado neste navegador. Crie seu perfil para continuar.');
   db.ativo=p.id;scSave(db);return {ok:true};
  }
  if(action==='logout'){db.ativo=null;scSave(db);return {ok:true};}
