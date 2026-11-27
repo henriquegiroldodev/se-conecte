@@ -200,3 +200,22 @@ input,textarea,select{max-width:100%}
 .admin-courses li span{font-size:13px;color:#667085}
 @media(max-width:850px){.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.admin-stats{gap:10px}.admin-stat{padding:15px}.admin-stat>strong{font-size:25px}.admin-section{padding:16px!important}.admin-section-heading{gap:5px}.admin-table{min-width:620px}}
+
+/* Administrador: seção própria de cadastros, cursos e videoaulas. */
+.admin-quicknav{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
+.admin-quicknav .btn{min-height:44px}
+.admin-video-list{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.admin-video-row{display:grid;grid-template-columns:minmax(170px,1fr) minmax(180px,2fr) auto;gap:14px;align-items:end;border:1px solid #e3e7ee;border-radius:12px;padding:15px;background:#fcfdff}
+.admin-video-row>div{align-self:center;min-width:0}
+.admin-video-row>div strong,.admin-video-row>div small{display:block;overflow-wrap:anywhere}
+.admin-video-row>div small{color:#667085;margin-top:5px}
+.admin-video-row .field{margin:0}
+.admin-video-row .field input{width:100%;padding:11px 12px;font-size:15px;min-width:0}
+.admin-video-row>.btn{margin-bottom:0;white-space:nowrap}
+.admin-course-form{margin:18px 0 25px;max-width:760px}
+.admin-course-form .field textarea{display:block;width:100%;border:1px solid #c8cdd7;border-radius:9px;padding:14px;font:inherit;resize:vertical;margin-top:9px}
+.admin-course-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:16px}
+.admin-catalog-heading{margin-top:29px;color:#102a56}
+#admin-cadastros,#admin-videos,#admin-cursos{scroll-margin-top:100px}
+@media(max-width:880px){.admin-video-row{grid-template-columns:minmax(0,1fr) auto}.admin-video-row>div{grid-column:1/-1}}
+@media(max-width:600px){.admin-video-row{grid-template-columns:minmax(0,1fr)}.admin-video-row>div{grid-column:1}.admin-video-row .btn{width:100%}.admin-course-fields{grid-template-columns:minmax(0,1fr)}.admin-quicknav{gap:7px}.admin-quicknav .btn{padding:9px 11px;font-size:13px}}
