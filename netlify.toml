@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+[functions]
+  directory = "netlify/functions"
+[[redirects]]
+  from = "/v2/api.php"
+  to = "/.netlify/functions/api"
+  status = 200
+  force = true
