@@ -8,7 +8,7 @@
 const $=s=>document.querySelector(s), escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state={csrf:'',usuario:null,cursos:[],certificados:[],detalhes:{}};
 async function api(action,data,params=''){
- const res=await fetch('api.php?action='+encodeURIComponent(action)+params,{method:data?'POST':'GET',headers:{'Content-Type':'application/json','X-CSRF-Token':state.csrf},credentials:'same-origin',body:data?JSON.stringify(data):undefined});
+ const res=await fetch('/.netlify/functions/api?action='+encodeURIComponent(action)+params,{method:data?'POST':'GET',headers:{'Content-Type':'application/json','X-CSRF-Token':state.csrf},credentials:'same-origin',body:data?JSON.stringify(data):undefined});
  const json=await res.json().catch(()=>({erro:'Resposta inválida do servidor.'}));if(!res.ok)throw Error(json.erro||'Não foi possível concluir.');return json;
 }
 function note(message,error=false){const n=$('#message');if(n){n.className='notice'+(error?' error':'');n.textContent=message;}}
@@ -111,5 +111,5 @@ async function render(){nav();const parts=(location.hash||'#/').slice(2).split('
  else main.innerHTML=home();
  document.title=(page==='talentos'?'Banco de Talentos':page==='certificados'?'Meus certificados':page==='conta'?'Minha conta':'Se Conecte')+' | Se Conecte';
  }catch(e){main.innerHTML='<div class="card"><h1>Não foi possível carregar</h1><p>'+escapeHTML(e.message)+'</p><button class="btn" id="retry">Tentar novamente</button></div>';$('#retry').onclick=()=>render();}}
-window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});refresh().then(render).catch(e=>{$('#content').innerHTML='<div class="card"><h1>Configuração necessária</h1><p>Não foi possível acessar a API da plataforma. Confira o XAMPP e a conexão MySQL.</p><p class="muted">'+escapeHTML(e.message)+'</p><p><a class="btn primary" href="diagnostico.php">Verificar conexão e banco</a></p></div>'});
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});refresh().then(render).catch(e=>{$('#content').innerHTML='<div class="card"><h1>Configuração necessária</h1><p>Não foi possível acessar a API da plataforma. Confira a configuração do PostgreSQL no Netlify.</p><p class="muted">'+escapeHTML(e.message)+'</p><p><a class="btn primary" href="../">Voltar ao início</a></p></div>'});
 </script><script src="accessibility.js"></script></body></html>
