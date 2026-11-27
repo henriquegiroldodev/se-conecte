@@ -24,7 +24,7 @@ Esta versão foi criada para apresentações sem PHP, MySQL, PostgreSQL ou funç
 
 ## Área administrativa local
 
-O perfil `admin` abre o painel de gestão, separado da navegação de aluno. É possível visualizar os cadastros feitos no mesmo navegador, atualizar URLs de videoaulas do YouTube e criar cursos com uma aula introdutória automática. As alterações persistem apenas no `localStorage` do dispositivo: **não há gestão global de cadastros nem publicação de novos cursos para outras pessoas/dispositivos**. Não há backend nem controle de permissões seguro; nunca use credenciais de demonstração para dados reais.
+O perfil `admin` abre o painel de gestão, separado da navegação de aluno. É possível visualizar os cadastros feitos no mesmo navegador, atualizar URLs de videoaulas do YouTube, criar cursos com uma aula introdutória automática e **cadastrar ou excluir vagas** do Banco de Talentos. As quatro vagas iniciais são exemplos fictícios; quando uma delas é excluída no painel, fica oculta apenas neste navegador. As alterações persistem apenas no `localStorage` do dispositivo: **não há gestão global de cadastros nem publicação de novos cursos para outras pessoas/dispositivos**. Não há backend nem controle de permissões seguro; nunca use credenciais de demonstração para dados reais.
 
 ## Cadastro e senha
 
