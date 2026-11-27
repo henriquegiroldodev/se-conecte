@@ -78,6 +78,30 @@ async function scDemoApi(action,data,params=''){
   db.ativo=p.id;scSave(db);return {ok:true};
  }
  if(action==='logout'){db.ativo=null;scSave(db);return {ok:true};}
+ // Área administrativa local: só gerencia os perfis deste navegador.
+ // A condição abaixo é uma conveniência de interface, não uma segurança de servidor.
+ if(action.startsWith('admin_')){
+  if(user?.id!=='sc-local-admin')throw Error('Acesso restrito ao perfil de administração local.');
+  const alunos=db.perfis.filter(p=>p.id!=='sc-local-admin');
+  if(action==='admin_overview'){
+   return {
+    alunos:alunos.map(p=>({id:p.id,nome:p.nome,email:p.email,aulas:(p.concluidas||[]).length,certificados:(p.certificados||[]).length,tem_talento:!!p.talento})),
+    indicadores:{alunos:alunos.length,aulas_concluidas:alunos.reduce((n,p)=>n+(p.concluidas||[]).length,0),certificados:alunos.reduce((n,p)=>n+(p.certificados||[]).length,0),talentos:alunos.filter(p=>!!p.talento).length},
+    cursos:SC_DEMO_COURSES.map(c=>({id:c.id,titulo:c.titulo,duracao_minutos:c.duracao_minutos,aulas:SC_DEMO_LESSONS.filter(a=>a.curso_id===c.id).length}))
+   };
+  }
+  if(action==='admin_reset_progress'){
+   const alvo=alunos.find(p=>p.id===data?.id);
+   if(!alvo)throw Error('Aluno não encontrado neste navegador.');
+   alvo.concluidas=[];alvo.certificados=[];scSave(db);return {ok:true};
+  }
+  if(action==='admin_delete_profile'){
+   const index=db.perfis.findIndex(p=>p.id===data?.id&&p.id!=='sc-local-admin');
+   if(index<0)throw Error('Aluno não encontrado neste navegador.');
+   db.perfis.splice(index,1);scSave(db);return {ok:true};
+  }
+  throw Error('Ação administrativa desconhecida.');
+ }
  const p=scRequire(user);
  if(action==='course'){
   const slug=new URLSearchParams(params.replace(/^&/,'' )).get('slug'),curso=SC_DEMO_COURSES.find(c=>c.slug===slug);
