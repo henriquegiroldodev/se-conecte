@@ -7,7 +7,10 @@
 <script src="demo-api.js"></script><script>
 const $=s=>document.querySelector(s), escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state={csrf:'',usuario:null,cursos:[],certificados:[],detalhes:{}};
-async function api(action,data,params=''){return scDemoApi(action,data,params);}
+async function api(action,data,params=''){
+ if(typeof scDemoApi!=='function')throw Error('Não foi possível carregar os arquivos do site. Atualize a página com Ctrl+F5 e confira se o Netlify está publicando a branch netlify.');
+ return scDemoApi(action,data,params);
+}
 
 function note(message,error=false){const n=$('#message');if(n){n.className='notice'+(error?' error':'');n.textContent=message;}}
 async function refresh(){const result=await api('bootstrap');const previous=window.SCActiveUserId||'guest';state={...state,...result};window.SCActiveUserId=state.usuario?.id||'guest';if(previous!==window.SCActiveUserId)window.SCAccessibilityV2?.load();}
@@ -117,5 +120,5 @@ async function render(){nav();const parts=(location.hash||'#/').slice(2).split('
  else main.innerHTML=home();
  document.title=(page==='talentos'?'Banco de Talentos':page==='certificados'?'Meus certificados':page==='conta'?'Meu perfil':'Se Conecte')+' | Se Conecte';
  }catch(e){main.innerHTML='<div class="card"><h1>Não foi possível carregar</h1><p>'+escapeHTML(e.message)+'</p><button class="btn" id="retry">Tentar novamente</button></div>';$('#retry').onclick=()=>render();}}
-window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});refresh().then(render).catch(e=>{$('#content').innerHTML='<div class="card"><h1>Configuração necessária</h1><p>Não foi possível acessar a API da plataforma. Confira se o armazenamento local do navegador está habilitado.</p><p class="muted">'+escapeHTML(e.message)+'</p><p><a class="btn primary" href="../">Voltar ao início</a></p></div>'});
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});refresh().then(render).catch(e=>{$('#content').innerHTML='<div class="card"><h1>Configuração necessária</h1><p>Não foi possível iniciar seus perfis. Atualize a página com Ctrl+F5; se continuar, permita armazenamento de dados do site.</p><p class="muted">'+escapeHTML(e.message)+'</p><p><a class="btn primary" href="../">Voltar ao início</a></p></div>'});
 </script><script src="accessibility.js"></script></body></html>
